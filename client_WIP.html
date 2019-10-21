@@ -79,6 +79,69 @@
     </div>
     <script type="text/javascript">
         // application code here!
+		
+		function TasksViewModel() {
+			var self = this;
+			self.register = function() {
+				$.ajax({
+					url: 'http://localhost:8000/register',
+					type: 'GET',
+					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
+					success: function() { alert('register completed'); }
+				});
+				
+			}
+			self.deregister = function() {
+				$.ajax({
+					url: 'http://localhost:8000/deregister',
+					type: 'GET',
+					data: //need to obtain charactername here
+					success: function() { alert('Deregister completed'); }
+				});
+			}
+			self.turns = function() {
+				$.ajax({
+					url: 'http://localhost:8000/turn',
+					type: 'GET',
+					data: //need to obtain charactername here
+					success: function() { alert('something about turns'); }
+				});
+			}
+			self.options = function() {
+				$.ajax({
+					url: 'http://localhost:8000/options',
+					type: 'GET',
+					data: //need to obtain charactername here
+					success: function() { alert('return options'); }
+				});
+			}
+			self.legality = function() {
+				$.ajax({
+					url: 'http://localhost:8000/legality',
+					type: 'GET',
+					data: //need to obtain charactername here
+					success: function() { alert('return legality'); }
+				});
+			}
+			self.move = function() {
+				$.ajax({
+					url: 'http://localhost:8000/move',
+					type: 'POST',
+					data: //need to obtain charactername here
+					success: function() { alert('Move completed'); }
+				});
+			}
+			self.init = function() {
+				$.ajax({
+					url: 'http://localhost:8000/init',
+					type: 'POST',
+					data: //need to obtain charactername here
+					success: function() { alert('Info'); }
+				});
+			}
+		}
+		ko.applyBindings(new CluelessViewModel(), $('#main')[0]);
+
     </script>
 </body>
 </html>
