@@ -1,17 +1,31 @@
 import json
 import logging
-import uuid
 from wsgiref import simple_server
+import random
 
 import falcon
-import requests
 
 
 class Gamestate(object):
 
+    playerList = []
+    avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-While", "Colonel-Mustard"]
+
+    def get_playerlist(self):
+        return self.playerList
+        
+    def add_player(self, playerName):
+        self.playerList.append(playerName)
+        if playerName in self.avaliableCharacters: self.avaliableCharacters.remove(playerName)
+        
+    def remove_player(self, playerName):
+        if playerName in self.playerList: self.playerList.remove(playerName)
+        self.avaliableCharacters.append(playerName)
+        
     #placeholder
-    def get_gamestate():
+    def get_gamestate(self):
         return True
+        
 
 class RegisterResource(object):
 
@@ -19,8 +33,11 @@ class RegisterResource(object):
         self.gs = gs
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
-    def on_get(self, req, resp, user_id):
+    def on_get(self, req, resp):
+        player = random.choice(self.gs.avaliableCharacters)
+        self.gs.add_player(player)
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{"playername": ' + player + '"}'
         resp.status = falcon.HTTP_200
 
 class DeregisterResource(object):
@@ -30,8 +47,10 @@ class DeregisterResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        self.gs.remove_player(player_id)
         resp.set_header('Powered-By', 'Falcon')
         resp.status = falcon.HTTP_200
+
 
 class TurnResource(object):
 
@@ -40,6 +59,12 @@ class TurnResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        if(player_id not in self.gs.get_playerlist()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently registered"
+            )
+        resp.body = json.dumps(self.gs.get_playerlist())
         resp.set_header('Powered-By', 'Falcon')
         resp.status = falcon.HTTP_200
 
@@ -50,6 +75,11 @@ class OptionsResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        if(player_id not in self.gs.get_playerlist()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently registered"
+            )
         resp.set_header('Powered-By', 'Falcon')
         resp.status = falcon.HTTP_200
 
@@ -60,6 +90,11 @@ class LegalityResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        if(player_id not in self.gs.get_playerlist()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently registered"
+            )
         resp.set_header('Powered-By', 'Falcon')
         resp.status = falcon.HTTP_200
 
@@ -70,6 +105,11 @@ class MoveResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_post(self, req, resp, player_id):
+        if(player_id not in self.gs.get_playerlist()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently registered"
+            )
         resp.set_header('Powered-By', 'Falcon')
         resp.status = falcon.HTTP_201
 
@@ -88,7 +128,7 @@ class initResource(object):
 # Configure your WSGI server to load "things.app" (app is a WSGI callable)
 app = falcon.API()
 
-gs = gamestate()
+gs = Gamestate()
 
 register = RegisterResource(gs)
 deregister = DeregisterResource(gs)
@@ -102,8 +142,8 @@ app.add_route('/register', register)
 app.add_route('/deregister/{player_id}', deregister)
 app.add_route('/turn/{player_id}', turn)
 app.add_route('/options/{player_id}', gameOptions)
-app.add_route('/legality//{player_id}/{move}', legality)
-app.add_route('/move/{player_id}', things)
+app.add_route('/legality/{player_id}/{move}', legality)
+app.add_route('/move/{player_id}', move)
 app.add_route('/init', gameInit)
 
 # Useful for debugging problems in your API; works with pdb.set_trace(). You
