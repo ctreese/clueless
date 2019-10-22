@@ -68,9 +68,10 @@ class TurnResource(object):
             "Invalid Player Name",
             "That player name is not currently registered"
             )
+        player_turn = random.choice(self.gs.avaliableCharacters)
         resp.body = json.dumps(self.gs.get_playerlist())
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{}'
+        resp.body = json.dumps({ 'playerturn': player_turn }); 
         resp.status = falcon.HTTP_200
 
 class OptionsResource(object):
@@ -85,8 +86,9 @@ class OptionsResource(object):
             "Invalid Player Name",
             "That player name is not currently registered"
             )
+        options = "1. Move 2. Make Suggestion 3. Make Accusation"
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{}'
+        resp.body = json.dumps({ 'move_options' : options });
         resp.status = falcon.HTTP_200
 
 class LegalityResource(object):
@@ -117,8 +119,9 @@ class MoveResource(object):
             "Invalid Player Name",
             "That player name is not currently registered"
             )
+        random_move = " moved from room to hallway."
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{}'
+        resp.body = json.dumps({ 'move' : random_move });
         resp.status = falcon.HTTP_201
 
 class initResource(object):
@@ -130,7 +133,11 @@ class initResource(object):
 
     def on_post(self, req, resp):
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{}'
+        #resp.body = '{}'
+        character_list = ''
+        for character in self.gs.avaliableCharacters:
+            character_list = character_list + ' ' + character
+        resp.body = json.dumps({ 'info' : character_list }); 
         resp.status = falcon.HTTP_201
         
 class CORSComponent(object):
