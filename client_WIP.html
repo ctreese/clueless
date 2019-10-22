@@ -22,7 +22,7 @@
 				<td>
                     <button class="btn" onclick = "register()">Register</button>
                 </td>
-                <td><p><b id = "name" ></b></p></td>
+                <td><p><b id = "register_text" ></b></p></td>
                 
             </tr>
 			<tr>
@@ -30,7 +30,7 @@
 				<td>
                     <button class="btn" onclick = "deregister()">Deregister</button>
                 </td>
-                <td><p><b id = "deregister_output"></b></p></td>
+                <td><p><b id = "deregister_text"></b></p></td>
                 
             </tr>
 			<tr>
@@ -38,7 +38,7 @@
 				<td>
                     <button class="btn" onclick = "turns()">Turn</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "turn_text" ></b></p></td>
                 
             </tr>
 			<tr>
@@ -46,7 +46,7 @@
 				<td>
                     <button class="btn" onclick = "gameOptions()">Turn Options</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "options_text"></b></p></td>
                 
             </tr>
 			<tr>
@@ -54,7 +54,7 @@
 				<td>
                     <button class="btn" onclick = "legality()"> Legality</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "legality_text" ></b></p></td>
                 
             </tr>
 			<tr>
@@ -62,14 +62,14 @@
 				<td>
                     <button class="btn" onclick = "move()">Move</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "move_text" ></b></p></td>
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
                     <button class="btn" onclick = "gameInit()">Initalize</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "gameInit_text" ></b></p></td>
             </tr>
         </table>
     </div>
@@ -77,6 +77,15 @@
         // application code here!
 		var playerName = "None"
 		var nextMove = "exampleMove";
+		//var register_output = "";
+		//var deregister_output = "";
+		//var turn_output = "";
+		//var gameOptions_output = "";
+		//var legality_output = "";
+		//var move_output = "";
+		//var gameInit_output = "";
+		
+		
 		
 		function register() {
 			if(playerName == "None") {
@@ -86,10 +95,16 @@
 					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
 					success: function(data) { 
 						playerName = data.playername;
-						//alert('register completed'); 
-						document.getElementById('name').innerHTML = playerName;}
+						var register_output = 'Playings as: ' + playerName
+						var deregister_output = ""
+						document.getElementById('legality_text').innerHTML = ""
+						document.getElementById('gameInit_text').innerHTML = ""
+						document.getElementById('move_text').innerHTML = ""
+						document.getElementById('options_text').innerHTML = ""
+						document.getElementById('turn_text').innerHTML = ""
+						document.getElementById('register_text').innerHTML = register_output
+						document.getElementById('deregister_text').innerHTML = deregister_output;}
 				});
-				document.getElementById('name').innerHTML = playerName;
 			}
 		}
 		
@@ -99,11 +114,16 @@
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() {
-					var deregistered_message = 'Deregistered player: ' + playerName
+					var deregister_output = 'Deregistered player: ' + playerName
 					playerName = "None"
-					//alert('Deregister completed'); 
-					document.getElementById('name').innerHTML = playerName;
-					document.getElementById('deregister_output').innerHTML = deregistered_message;}
+					var register_output = 'Playings as: ' + playerName
+					document.getElementById('register_text').innerHTML = register_output
+					document.getElementById('legality_text').innerHTML = ""
+					document.getElementById('gameInit_text').innerHTML = ""
+					document.getElementById('move_text').innerHTML = ""
+					document.getElementById('options_text').innerHTML = ""
+					document.getElementById('turn_text').innerHTML = ""
+					document.getElementById('deregister_text').innerHTML = deregister_output;}
 			});	
 		}
 		
@@ -112,7 +132,15 @@
 				url: 'http://localhost:8000/turn/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function() { alert('something about turns'); }
+				success: function(data) { 
+				//alert('something about turns')
+				var turn_output = "It is " + data.playerturn +"s turn."
+				document.getElementById('turn_text').innerHTML = turn_output
+				document.getElementById('options_text').innerHTML = ""
+				document.getElementById('legality_text').innerHTML = ""
+				document.getElementById('move_text').innerHTML = ""
+				document.getElementById('gameInit_text').innerHTML = ""
+				; }
 			});
 		}
 		
@@ -121,7 +149,14 @@
 				url: 'http://localhost:8000/options/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function() { alert('return options'); }
+				success: function(data) { 
+				document.getElementById('options_text').innerHTML = data.move_options
+				document.getElementById('legality_text').innerHTML = ""
+				document.getElementById('move_text').innerHTML = ""
+				document.getElementById('turn_text').innerHTML = ""
+				document.getElementById('gameInit_text').innerHTML = "";
+				//alert('return options')
+				; }
 			});
 		}
 		
@@ -130,7 +165,14 @@
 				url: 'http://localhost:8000/legality/' + playerName + '/' + nextMove,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function() { alert('return legality'); }
+				success: function() { 
+					//alert('return legality')
+					var legality_output = playerName + ' can perform the following move: ' + nextMove
+					document.getElementById('gameInit_text').innerHTML = ""
+					document.getElementById('move_text').innerHTML = ""
+					document.getElementById('options_text').innerHTML = ""
+					document.getElementById('turn_text').innerHTML = ""
+					document.getElementById('legality_text').innerHTML = legality_output;}
 			});	
 		}
 		
@@ -139,7 +181,14 @@
 				url: 'http://localhost:8000/move/' + playerName,
 				type: 'POST',
 				//data: //need to obtain charactername here
-				success: function() { alert('Move completed'); }
+				success: function(data) { //alert('Move completed')
+				var move_output = playerName + data.move
+				document.getElementById('move_text').innerHTML = move_output
+				document.getElementById('legality_text').innerHTML = ""
+				document.getElementById('options_text').innerHTML = ""
+				document.getElementById('turn_text').innerHTML = ""
+				document.getElementById('gameInit_text').innerHTML = "";
+				; }
 			});
 		}
 		
@@ -148,7 +197,16 @@
 				url: 'http://localhost:8000/init',
 				type: 'POST',
 				//data: //need to obtain charactername here
-				success: function() { alert('Info'); }
+				success: function(data) { 
+				//alert('Info')
+				//var init_message = data.message
+				var available_characters = data.info;
+				var gameInit_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+				document.getElementById('legality_text').innerHTML = ""
+				document.getElementById('move_text').innerHTML = ""
+				document.getElementById('options_text').innerHTML = ""
+				document.getElementById('turn_text').innerHTML = ""
+				document.getElementById('gameInit_text').innerHTML = gameInit_output;}
 			});
 		}
 		
