@@ -85,8 +85,8 @@
 					type: 'GET',
 					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
 					success: function(data) { 
-					playerName = data;
-					alert('register completed'); }
+						playerName = data.playername;
+						alert('register completed'); }
 				});
 			}
 		}
@@ -96,9 +96,9 @@
 				url: 'http://localhost:8000/deregister/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				error: function() {
-				playerName = "None"
-				alert('Deregister completed'); }
+				success: function() {
+					playerName = "None"
+					alert('Deregister completed'); }
 			});	
 		}
 		

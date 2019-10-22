@@ -15,12 +15,14 @@ class Gamestate(object):
         return self.playerList
         
     def add_player(self, playerName):
-        self.playerList.append(playerName)
-        if playerName in self.avaliableCharacters: self.avaliableCharacters.remove(playerName)
+        if playerName in self.avaliableCharacters:
+            self.playerList.append(playerName)
+            self.avaliableCharacters.remove(playerName)
         
     def remove_player(self, playerName):
-        if playerName in self.playerList: self.playerList.remove(playerName)
-        self.avaliableCharacters.append(playerName)
+        if playerName in self.playerList:
+            self.playerList.remove(playerName)      
+            self.avaliableCharacters.append(playerName)
         
     #placeholder
     def get_gamestate(self):
@@ -37,7 +39,8 @@ class RegisterResource(object):
         player = random.choice(self.gs.avaliableCharacters)
         self.gs.add_player(player)
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{"playername": ' + player + '"}'
+        print(player)
+        resp.body = json.dumps({ 'playername': player }); 
         resp.status = falcon.HTTP_200
 
 class DeregisterResource(object):
@@ -49,6 +52,7 @@ class DeregisterResource(object):
     def on_get(self, req, resp, player_id):
         self.gs.remove_player(player_id)
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_200
 
 
@@ -66,6 +70,7 @@ class TurnResource(object):
             )
         resp.body = json.dumps(self.gs.get_playerlist())
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_200
 
 class OptionsResource(object):
@@ -81,6 +86,7 @@ class OptionsResource(object):
             "That player name is not currently registered"
             )
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_200
 
 class LegalityResource(object):
@@ -96,6 +102,7 @@ class LegalityResource(object):
             "That player name is not currently registered"
             )
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_200
 
 class MoveResource(object):
@@ -111,6 +118,7 @@ class MoveResource(object):
             "That player name is not currently registered"
             )
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_201
 
 class initResource(object):
@@ -122,32 +130,33 @@ class initResource(object):
 
     def on_post(self, req, resp):
         resp.set_header('Powered-By', 'Falcon')
+        resp.body = '{}'
         resp.status = falcon.HTTP_201
         
 class CORSComponent(object):
-	def process_response(self, req, resp, resource, req_succeeded):
-		resp.set_header('Access-Control-Allow-Origin', '*')
+    def process_response(self, req, resp, resource, req_succeeded):
+        resp.set_header('Access-Control-Allow-Origin', '*')
 
-		if (req_succeeded
-			and req.method == 'OPTIONS'
-			and req.get_header('Access-Control-Request-Method')
-		):
-			# NOTE(kgriffs): This is a CORS preflight request. Patch the
-			#   response accordingly.
+        if (req_succeeded
+            and req.method == 'OPTIONS'
+            and req.get_header('Access-Control-Request-Method')
+        ):
+            # NOTE(kgriffs): This is a CORS preflight request. Patch the
+            #   response accordingly.
 
-			allow = resp.get_header('Allow')
-			resp.delete_header('Allow')
+            allow = resp.get_header('Allow')
+            resp.delete_header('Allow')
 
-			allow_headers = req.get_header(
-				'Access-Control-Request-Headers',
-				default='*'
-			)
+            allow_headers = req.get_header(
+                'Access-Control-Request-Headers',
+                default='*'
+            )
 
-			resp.set_headers((
-				('Access-Control-Allow-Methods', allow),
-				('Access-Control-Allow-Headers', allow_headers),
-				('Access-Control-Max-Age', '86400'),  # 24 hours
-			))
+            resp.set_headers((
+                ('Access-Control-Allow-Methods', allow),
+                ('Access-Control-Allow-Headers', allow_headers),
+                ('Access-Control-Max-Age', '86400'),  # 24 hours
+            ))
 
 
 # Configure your WSGI server to load "things.app" (app is a WSGI callable)
