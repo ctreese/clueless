@@ -17,11 +17,10 @@
     <div id="main" class="container">
         <table class="table table-striped">
             <tr><td style="width: 1px;"></td><td><b>Client Input</b></td><td><b>Server Output</b></td></tr>
-            <!-- ko foreach: tasks --> 
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.register" class="btn">Join</button>
+                    <button class="btn" onclick = "register()"> Register</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -29,7 +28,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.deregister" class="btn">Leave</button>
+                    <button class="btn" onclick = "deregister()"> Deegister</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -37,7 +36,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.turn" class="btn">Who's Turn?</button>
+                    <button class="btn" onclick = "turns()"> Turn</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -45,7 +44,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.options" class="btn">Turn Options</button>
+                    <button class="btn" onclick = "gameOptions()">Turn Options</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -53,7 +52,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.legality" class="btn">Legality of Move?</button>
+                    <button class="btn" onclick = "legality()"> Legality</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -61,86 +60,85 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.move" class="btn">Move</button>
+                    <button class="btn" onclick = "move()">Move</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
-                
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button data-bind="click: $parent.init" class="btn">Init?</button>
+                    <button class="btn" onclick = "gameInit()">Initalize</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
-                
             </tr>
-			<!-- /ko -->
         </table>
     </div>
     <script type="text/javascript">
         // application code here!
 		
-		function TasksViewModel() {
-			var self = this;
-			self.register = function() {
-				$.ajax({
-					url: 'http://localhost:8000/register',
-					type: 'GET',
-					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
-					success: function() { alert('register completed'); }
-				});
-				
-			}
-			self.deregister = function() {
-				$.ajax({
-					url: 'http://localhost:8000/deregister',
-					type: 'GET',
-					data: //need to obtain charactername here
-					success: function() { alert('Deregister completed'); }
-				});
-			}
-			self.turns = function() {
-				$.ajax({
-					url: 'http://localhost:8000/turn',
-					type: 'GET',
-					data: //need to obtain charactername here
-					success: function() { alert('something about turns'); }
-				});
-			}
-			self.options = function() {
-				$.ajax({
-					url: 'http://localhost:8000/options',
-					type: 'GET',
-					data: //need to obtain charactername here
-					success: function() { alert('return options'); }
-				});
-			}
-			self.legality = function() {
-				$.ajax({
-					url: 'http://localhost:8000/legality',
-					type: 'GET',
-					data: //need to obtain charactername here
-					success: function() { alert('return legality'); }
-				});
-			}
-			self.move = function() {
-				$.ajax({
-					url: 'http://localhost:8000/move',
-					type: 'POST',
-					data: //need to obtain charactername here
-					success: function() { alert('Move completed'); }
-				});
-			}
-			self.init = function() {
-				$.ajax({
-					url: 'http://localhost:8000/init',
-					type: 'POST',
-					data: //need to obtain charactername here
-					success: function() { alert('Info'); }
-				});
-			}
+		function register() {
+			$.ajax({
+				url: 'http://localhost:8000/register',
+				type: 'GET',
+				//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
+				success: function() { alert('register completed'); }
+			});
 		}
-		ko.applyBindings(new CluelessViewModel(), $('#main')[0]);
+		
+		function deregister() {
+			$.ajax({
+				url: 'http://localhost:8000/deregister',
+				type: 'GET',
+				//data: //need to obtain charactername here
+				success: function() { alert('Deregister completed'); }
+			});	
+		}
+		
+		function turns() {
+			$.ajax({
+				url: 'http://localhost:8000/turn',
+				type: 'GET',
+				//data: //need to obtain charactername here
+				success: function() { alert('something about turns'); }
+			});
+		}
+		
+		function gameOptions() {
+			$.ajax({
+				url: 'http://localhost:8000/options',
+				type: 'GET',
+				//data: //need to obtain charactername here
+				success: function() { alert('return options'); }
+			});
+		}
+		
+		function legality() {
+			$.ajax({
+				url: 'http://localhost:8000/legality',
+				type: 'GET',
+				//data: //need to obtain charactername here
+				success: function() { alert('return legality'); }
+			});	
+		}
+		
+		function move() {
+			$.ajax({
+				url: 'http://localhost:8000/move',
+				type: 'POST',
+				//data: //need to obtain charactername here
+				success: function() { alert('Move completed'); }
+			});
+		}
+		
+		function gameInit() {
+			$.ajax({
+				url: 'http://localhost:8000/init',
+				type: 'POST',
+				//data: //need to obtain charactername here
+				success: function() { alert('Info'); }
+			});
+		}
+		
 
     </script>
 </body>
