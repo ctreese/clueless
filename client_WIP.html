@@ -22,7 +22,7 @@
 				<td>
                     <button class="btn" onclick = "register()">Register</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "name" ></b></p></td>
                 
             </tr>
 			<tr>
@@ -30,7 +30,7 @@
 				<td>
                     <button class="btn" onclick = "deregister()">Deregister</button>
                 </td>
-                <td><p><b data-bind="text: Some Output"></b></p></td>
+                <td><p><b id = "deregister_output"></b></p></td>
                 
             </tr>
 			<tr>
@@ -86,8 +86,10 @@
 					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
 					success: function(data) { 
 						playerName = data.playername;
-						alert('register completed'); }
+						//alert('register completed'); 
+						document.getElementById('name').innerHTML = playerName;}
 				});
+				document.getElementById('name').innerHTML = playerName;
 			}
 		}
 		
@@ -97,8 +99,11 @@
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() {
+					var deregistered_message = 'Deregistered player: ' + playerName
 					playerName = "None"
-					alert('Deregister completed'); }
+					//alert('Deregister completed'); 
+					document.getElementById('name').innerHTML = playerName;
+					document.getElementById('deregister_output').innerHTML = deregistered_message;}
 			});	
 		}
 		
@@ -147,7 +152,6 @@
 			});
 		}
 		
-
     </script>
 </body>
 </html>
