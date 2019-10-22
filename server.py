@@ -89,7 +89,7 @@ class LegalityResource(object):
         self.gs = gs
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
-    def on_get(self, req, resp, player_id):
+    def on_get(self, req, resp, player_id, move):
         if(player_id not in self.gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",

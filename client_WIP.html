@@ -20,7 +20,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button class="btn" onclick = "register()"> Register</button>
+                    <button class="btn" onclick = "register()">Register</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -28,7 +28,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button class="btn" onclick = "deregister()"> Deegister</button>
+                    <button class="btn" onclick = "deregister()">Deregister</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -36,7 +36,7 @@
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
-                    <button class="btn" onclick = "turns()"> Turn</button>
+                    <button class="btn" onclick = "turns()">Turn</button>
                 </td>
                 <td><p><b data-bind="text: Some Output"></b></p></td>
                 
@@ -75,28 +75,36 @@
     </div>
     <script type="text/javascript">
         // application code here!
+		var playerName = "None"
+		var nextMove = "exampleMove";
 		
 		function register() {
-			$.ajax({
-				url: 'http://localhost:8000/register',
-				type: 'GET',
-				//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
-				success: function() { alert('register completed'); }
-			});
+			if(playerName == "None") {
+				$.ajax({
+					url: 'http://localhost:8000/register',
+					type: 'GET',
+					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
+					success: function(data) { 
+					playerName = data;
+					alert('register completed'); }
+				});
+			}
 		}
 		
 		function deregister() {
 			$.ajax({
-				url: 'http://localhost:8000/deregister',
+				url: 'http://localhost:8000/deregister/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function() { alert('Deregister completed'); }
+				error: function() {
+				playerName = "None"
+				alert('Deregister completed'); }
 			});	
 		}
 		
 		function turns() {
 			$.ajax({
-				url: 'http://localhost:8000/turn',
+				url: 'http://localhost:8000/turn/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() { alert('something about turns'); }
@@ -105,7 +113,7 @@
 		
 		function gameOptions() {
 			$.ajax({
-				url: 'http://localhost:8000/options',
+				url: 'http://localhost:8000/options/' + playerName,
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() { alert('return options'); }
@@ -114,7 +122,7 @@
 		
 		function legality() {
 			$.ajax({
-				url: 'http://localhost:8000/legality',
+				url: 'http://localhost:8000/legality/' + playerName + '/' + nextMove,
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() { alert('return legality'); }
@@ -123,7 +131,7 @@
 		
 		function move() {
 			$.ajax({
-				url: 'http://localhost:8000/move',
+				url: 'http://localhost:8000/move/' + playerName,
 				type: 'POST',
 				//data: //need to obtain charactername here
 				success: function() { alert('Move completed'); }
