@@ -221,14 +221,12 @@ def hallwayInitialization(room):
 #    hallway[11] = Hallway([room[7], room[9]]) #library to billiard room
     return hallway
     
-def playerInitialization(hallway):
-    player = []
-    player.append(Player("Rev. Green", hallway[5]))
-    player.append(Player("Colonel Mustard", hallway[2]))
-    player.append(Player("Mrs. Peacock", hallway[6]))
-    player.append(Player("Professor Plum", hallway[7]))
-    player.append(Player("Miss Scarlett", hallway[1]))
-    player.append(Player("Mrs. White", hallway[4]))
+def playerInitialization(hallway, playerList):
+    player = {}
+    i = 0
+    for character in playerList:
+        player.update({character : Player(character, hallway[i])})
+        i += 1
     
     
 #    player[0] = Player("Rev. Green", hallway[5])
@@ -284,10 +282,10 @@ def gameInitialization():
     for card in players[0].hand:
         print(card.name)
         
-    gameLoop(board, players) #calls the main game loop... this will loop through players turns until the game is won
+    #gameLoop(board, players) #calls the main game loop... this will loop through players turns until the game is won
     
         
-gameInitialization()
+#gameInitialization()
 #gameLoop()
 
 

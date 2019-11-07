@@ -5,11 +5,22 @@ import random
 
 import falcon
 
+import game_logic
+
 
 class Gamestate(object):
 
     playerList = []
     avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-While", "Colonel-Mustard"]
+    gameStarted = False
+    
+    cards = []
+    rooms = []
+    hallways =[]
+    players = []
+    deck = []
+    caseFile = []
+    board = []
 
     def get_playerlist(self):
         return self.playerList
@@ -27,6 +38,16 @@ class Gamestate(object):
     #placeholder
     def get_gamestate(self):
         return True
+        
+    def reinit_gamestate(self):
+        self.cards = game_logic.cardInitialization()
+        self.rooms = game_logic.roomInitialization()
+        self.hallways = game_logic.hallwayInitialization(self.rooms)
+        self.players = game_logic.playerInitialization(self.hallways, self.playerList)
+        self.deck = game_logic.Deck(self.players,self.cards)
+        self.caseFile = game_logic.deck.deal()
+        self.board = game_logic.Board(self.rooms, self.hallways, self.caseFile)
+        gameStarted = True
 
 
 class RegisterResource(object):
@@ -86,7 +107,7 @@ class OptionsResource(object):
             "Invalid Player Name",
             "That player name is not currently registered"
             )
-        options = "1. Move 2. Make Suggestion 3. Make Accusation"
+        options = self.gs.players[player_id].getLegalMoves()
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'move_options' : options });
         resp.status = falcon.HTTP_200
@@ -129,12 +150,32 @@ class initResource(object):
     def __init__(self, db):
         self.gs = gs
         self.logger = logging.getLogger('thingsapp.' + __name__)
-
+        
+    def on_get(self, req, resp, player_id):
+        resp.set_header('Powered-By', 'Falcon')
+        if not self.gs.gameStarted:
+            resp.body = json.dumps({ 'gameStarted' : "false" });
+            resp.status = falcon.HTTP_200
+        else:
+            startingPos1 = self.gs.players[player_id].location.adj_room[0].name
+            startingPos2 = self.gs.players[player_id].location.adj_room[1].name
+            caseFileSuspect = self.gs.caseFile.suspect.name
+            caseFileWeapon = self.gs.caseFile.weapon.name
+            caseFileRoom = self.gs.caseFile.room.name
+            numPlayers = self.gs.deck.numPlayers
+            cardsList = []
+            for card in self.gs.players[player_id].hand:
+                cardList.append(card.name)
+                
+            resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'caseFileSuspect' : caseFileSuspect, 'caseFileWeapon' : caseFileWeapon, \
+                'caseFileRoom' : caseFileRoom, 'numPlayers' : numPlayers, 'cardList' : cardsList})
+            resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
         resp.set_header('Powered-By', 'Falcon')
         #resp.body = '{}'
         character_list = ''
+        self.gs.reinit_gamestate()
         for character in self.gs.avaliableCharacters:
             character_list = character_list + ' ' + character
         resp.body = json.dumps({ 'info' : character_list });
