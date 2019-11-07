@@ -13,21 +13,21 @@ class Gamestate(object):
 
     def get_playerlist(self):
         return self.playerList
-        
+
     def add_player(self, playerName):
         if playerName in self.avaliableCharacters:
             self.playerList.append(playerName)
             self.avaliableCharacters.remove(playerName)
-        
+
     def remove_player(self, playerName):
         if playerName in self.playerList:
-            self.playerList.remove(playerName)      
+            self.playerList.remove(playerName)
             self.avaliableCharacters.append(playerName)
-        
+
     #placeholder
     def get_gamestate(self):
         return True
-        
+
 
 class RegisterResource(object):
 
@@ -40,7 +40,7 @@ class RegisterResource(object):
         self.gs.add_player(player)
         resp.set_header('Powered-By', 'Falcon')
         print(player)
-        resp.body = json.dumps({ 'playername': player }); 
+        resp.body = json.dumps({ 'playername': player });
         resp.status = falcon.HTTP_200
 
 class DeregisterResource(object):
@@ -71,7 +71,7 @@ class TurnResource(object):
         player_turn = random.choice(self.gs.avaliableCharacters)
         resp.body = json.dumps(self.gs.get_playerlist())
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'playerturn': player_turn }); 
+        resp.body = json.dumps({ 'playerturn': player_turn });
         resp.status = falcon.HTTP_200
 
 class OptionsResource(object):
@@ -137,9 +137,9 @@ class initResource(object):
         character_list = ''
         for character in self.gs.avaliableCharacters:
             character_list = character_list + ' ' + character
-        resp.body = json.dumps({ 'info' : character_list }); 
+        resp.body = json.dumps({ 'info' : character_list });
         resp.status = falcon.HTTP_201
-        
+
 class CORSComponent(object):
     def process_response(self, req, resp, resource, req_succeeded):
         resp.set_header('Access-Control-Allow-Origin', '*')
@@ -192,5 +192,5 @@ app.add_route('/init', gameInit)
 # auto-restart workers when it detects a code change, and it also works
 # with pdb.
 if __name__ == '__main__':
-    httpd = simple_server.make_server('127.0.0.1', 8000, app)
+    httpd = simple_server.make_server('0.0.0.0', 8000, app)
     httpd.serve_forever()

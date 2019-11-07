@@ -14,6 +14,12 @@
             <a class="brand" href="#">Clueless Client Demo</a>
         </div>
     </div>
+    <div class="container">
+      <label>Enter your game server IP here:</label>
+      <input type="text" id="server-ip" value="10.0.0.19" />
+      <label>Enter your game server port here:</label>
+      <input type="text" id="server-port" value="8000" />
+    </div>
     <div id="main" class="container">
         <table class="table table-striped">
             <tr><td style="width: 1px;"></td><td><b>Client Input</b></td><td><b>Server Output</b></td></tr>
@@ -23,7 +29,7 @@
                     <button class="btn" onclick = "register()">Register</button>
                 </td>
                 <td><p><b id = "register_text" ></b></p></td>
-                
+
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
@@ -31,7 +37,7 @@
                     <button class="btn" onclick = "deregister()">Deregister</button>
                 </td>
                 <td><p><b id = "deregister_text"></b></p></td>
-                
+
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
@@ -39,7 +45,7 @@
                     <button class="btn" onclick = "turns()">Turn</button>
                 </td>
                 <td><p><b id = "turn_text" ></b></p></td>
-                
+
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
@@ -47,7 +53,7 @@
                     <button class="btn" onclick = "gameOptions()">Turn Options</button>
                 </td>
                 <td><p><b id = "options_text"></b></p></td>
-                
+
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
@@ -55,7 +61,7 @@
                     <button class="btn" onclick = "legality()"> Legality</button>
                 </td>
                 <td><p><b id = "legality_text" ></b></p></td>
-                
+
             </tr>
 			<tr>
 				<td style="width: 1px;"></td>
@@ -84,16 +90,17 @@
 		//var legality_output = "";
 		//var move_output = "";
 		//var gameInit_output = "";
-		
-		
-		
+
+    var ipAddress = document.getElementById('server-ip').value
+    var port = document.getElementById('server-port').value
+
 		function register() {
 			if(playerName == "None") {
 				$.ajax({
-					url: 'http://localhost:8000/register',
+					url: `http://${ipAddress}:${port}/register`,
 					type: 'GET',
 					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
-					success: function(data) { 
+					success: function(data) {
 						playerName = data.playername;
 						var register_output = 'Playings as: ' + playerName
 						var deregister_output = ""
@@ -107,10 +114,10 @@
 				});
 			}
 		}
-		
+
 		function deregister() {
 			$.ajax({
-				url: 'http://localhost:8000/deregister/' + playerName,
+				url: `http://${ipAddress}:${port}/deregister/${playerName}`,
 				type: 'GET',
 				//data: //need to obtain charactername here
 				success: function() {
@@ -124,15 +131,15 @@
 					document.getElementById('options_text').innerHTML = ""
 					document.getElementById('turn_text').innerHTML = ""
 					document.getElementById('deregister_text').innerHTML = deregister_output;}
-			});	
+			});
 		}
-		
+
 		function turns() {
 			$.ajax({
-				url: 'http://localhost:8000/turn/' + playerName,
+				url: `http://${ipAddress}:${port}/turn/${playerName}`,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function(data) { 
+				success: function(data) {
 				//alert('something about turns')
 				var turn_output = "It is " + data.playerturn +"s turn."
 				document.getElementById('turn_text').innerHTML = turn_output
@@ -143,13 +150,13 @@
 				; }
 			});
 		}
-		
+
 		function gameOptions() {
 			$.ajax({
-				url: 'http://localhost:8000/options/' + playerName,
+				url: `http://${ipAddress}:${port}/options/${playerName}`,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function(data) { 
+				success: function(data) {
 				document.getElementById('options_text').innerHTML = data.move_options
 				document.getElementById('legality_text').innerHTML = ""
 				document.getElementById('move_text').innerHTML = ""
@@ -159,13 +166,13 @@
 				; }
 			});
 		}
-		
+
 		function legality() {
 			$.ajax({
-				url: 'http://localhost:8000/legality/' + playerName + '/' + nextMove,
+				url: `http://${ipAddress}:${port}/legality/${playerName}/nextMove`,
 				type: 'GET',
 				//data: //need to obtain charactername here
-				success: function() { 
+				success: function() {
 					//alert('return legality')
 					var legality_output = playerName + ' can perform the following move: ' + nextMove
 					document.getElementById('gameInit_text').innerHTML = ""
@@ -173,12 +180,12 @@
 					document.getElementById('options_text').innerHTML = ""
 					document.getElementById('turn_text').innerHTML = ""
 					document.getElementById('legality_text').innerHTML = legality_output;}
-			});	
+			});
 		}
-		
+
 		function move() {
 			$.ajax({
-				url: 'http://localhost:8000/move/' + playerName,
+				url: `http://${ipAddress}:${port}/move/${playerName}`,
 				type: 'POST',
 				//data: //need to obtain charactername here
 				success: function(data) { //alert('Move completed')
@@ -191,13 +198,13 @@
 				; }
 			});
 		}
-		
+
 		function gameInit() {
 			$.ajax({
-				url: 'http://localhost:8000/init',
+				url: `http://${ipAddress}:${port}/init`,
 				type: 'POST',
 				//data: //need to obtain charactername here
-				success: function(data) { 
+				success: function(data) {
 				//alert('Info')
 				//var init_message = data.message
 				var available_characters = data.info;
@@ -209,7 +216,7 @@
 				document.getElementById('gameInit_text').innerHTML = gameInit_output;}
 			});
 		}
-		
+
     </script>
 </body>
 </html>
