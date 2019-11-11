@@ -11,6 +11,7 @@ import game_logic
 class Gamestate(object):
 
     playerList = []
+    playerListActive = []
     avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-White", "Colonel-Mustard"]
     playerTurn = ""
     gameStarted = False
@@ -22,6 +23,9 @@ class Gamestate(object):
     deck = []
     caseFile = []
     board = []
+    
+    def get_activePlayers(self):
+        return self.playerListActive
 
     def get_playerlist(self):
         return self.playerList
@@ -41,15 +45,27 @@ class Gamestate(object):
         return True
         
     def init_gamestate(self):
+        self.playerListActive = self.playerList
         self.cards = game_logic.cardInitialization()
         self.rooms = game_logic.roomInitialization()
         self.hallways = game_logic.hallwayInitialization(self.rooms)
-        self.players = game_logic.playerInitialization(self.hallways, self.playerList)
+        self.players = game_logic.playerInitialization(self.hallways, self.playerListActive)
         self.deck = game_logic.Deck(self.players,self.cards)
         self.caseFile = self.deck.deal()
         self.board = game_logic.Board(self.rooms, self.hallways, self.caseFile)
-        self.playerTurn = random.choice(self.playerList)
+        self.playerTurn = random.choice(self.playerListActive)
         self.gameStarted = True
+        
+    def nextTurn(self, player_id):
+        idx = self.playerListActive.index(player_id)
+        if(len(self.playerListActive)-1 == idx):
+            #last item
+            self.playerTurn = self.playerListActive[0]
+        else:
+            self.playerTurn = self.playerListActive[idx+1]
+        #check to see if accusation has been made, if so skip turn
+        if(self.players[self.playerTurn].accusation_made):
+            nextTurn(self, self.playerTurn)
 
 
 class RegisterResource(object):
@@ -91,10 +107,10 @@ class TurnResource(object):
             "Game Not Started",
             "Please start the game before issuing commands"
             )
-        if(player_id not in self.gs.get_playerlist()):
+        if(player_id not in self.gs.get_activePlayers()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
-            "That player name is not currently registered"
+            "That player name is not currently playing"
             )
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'playerturn': self.gs.playerTurn });
@@ -112,14 +128,20 @@ class OptionsResource(object):
             "Game Not Started",
             "Please start the game before issuing commands"
             )
-        if(player_id not in self.gs.get_playerlist()):
+        if(player_id not in self.gs.get_activePlayers()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
-            "That player name is not currently registered"
+            "That player name is not currently playing"
             )
         options = self.gs.players[player_id].getLegalMoves()
+        pos1 = self.gs.players[player_id].location.adj_room[0].name
+        pos2 = self.gs.players[player_id].location.adj_room[1].name
+        cardsList = []
+        for card in self.gs.players[player_id].hand:
+            cardsList.append(card.name)
+            
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'move_options' : options });
+        resp.body = json.dumps({ 'move_options' : options, 'pos1' : pos1, 'pos2' : pos2, 'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
 
 class LegalityResource(object):
@@ -129,19 +151,23 @@ class LegalityResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id, move):
+        resp.set_header('Powered-By', 'Falcon')
         if not self.gs.gameStarted:
             raise falcon.HTTPInternalServerError(
             "Game Not Started",
             "Please start the game before issuing commands"
             )
-        if(player_id not in self.gs.get_playerlist()):
+        if(player_id not in self.gs.get_activePlayers()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
-            "That player name is not currently registered"
+            "That player name is not currently playing"
             )
-        resp.set_header('Powered-By', 'Falcon')
-        resp.body = '{}'
-        resp.status = falcon.HTTP_200
+        if(move in self.gs.players[player_id].getLegalMoves()): 
+            resp.body = '{OK}'
+            resp.status = falcon.HTTP_200
+        else:
+            resp.body = '{INVALID}'
+            resp.status = falcon.HTTP_200
 
 class MoveResource(object):
 
@@ -149,17 +175,30 @@ class MoveResource(object):
         self.gs = gs
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
-    def on_post(self, req, resp, player_id):
+    def on_post(self, req, resp, player_id, move):
         if not self.gs.gameStarted:
             raise falcon.HTTPInternalServerError(
             "Game Not Started",
             "Please start the game before issuing commands"
             )
-        if(player_id not in self.gs.get_playerlist()):
+        if(player_id not in self.gs.get_activePlayers()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
-            "That player name is not currently registered"
+            "That player name is not currently playing"
             )
+        if(player_id not in self.gs.playerTurn):
+            raise falcon.HTTPBadRequest(
+            "Wrong Turn",
+            "It is not your turn."
+            )
+        if(move not in self.gs.players[player_id].getLegalMoves()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Move",
+            "This is not a valid move."
+            )
+        
+        self.gs.nextTurn(player_id)
+        
         random_move = " moved from room to hallway."
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'move' : random_move });
@@ -201,7 +240,7 @@ class initResource(object):
             )
         character_list = ''
         self.gs.init_gamestate()
-        resp.body = json.dumps({ 'info' : self.gs.playerList });
+        resp.body = json.dumps({ 'info' : self.gs.playerListActive });
         resp.status = falcon.HTTP_201
 
 class CORSComponent(object):
@@ -248,7 +287,7 @@ app.add_route('/deregister/{player_id}', deregister)
 app.add_route('/turn/{player_id}', turn)
 app.add_route('/options/{player_id}', gameOptions)
 app.add_route('/legality/{player_id}/{move}', legality)
-app.add_route('/move/{player_id}', move)
+app.add_route('/move/{player_id}/{move}', move)
 app.add_route('/init/{player_id}', gameInit)
 
 # Useful for debugging problems in your API; works with pdb.set_trace(). You
