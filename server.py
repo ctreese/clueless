@@ -67,7 +67,12 @@ class Gamestate(object):
         if(self.players[self.playerTurn].accusation_made):
             nextTurn(self, self.playerTurn)
 
+    def makeSuggestion(self, character, weapon, location):
+        pass
 
+    def makeAccusation(self, character, weapon, location):
+        pass
+        
 class RegisterResource(object):
 
     def __init__(self, db):
@@ -134,14 +139,15 @@ class OptionsResource(object):
             "That player name is not currently playing"
             )
         options = self.gs.players[player_id].getLegalMoves()
-        pos1 = self.gs.players[player_id].location.adj_room[0].name
-        pos2 = self.gs.players[player_id].location.adj_room[1].name
+        moveCandidates = []
+        for position in self.gs.players[player_id].location.adj_locs:
+            moveCandidates.append(position.name)
         cardsList = []
         for card in self.gs.players[player_id].hand:
             cardsList.append(card.name)
             
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'move_options' : options, 'pos1' : pos1, 'pos2' : pos2, 'cardsList' : cardsList });
+        resp.body = json.dumps({ 'move_options' : options, 'adj' : moveCandidates, 'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
 
 class LegalityResource(object):
@@ -199,17 +205,21 @@ class MoveResource(object):
         
         if(move == "moveToHallway"):
             #move to hallway logic
-            print(req.media.get('testMes'), flush=True)
+            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
             pass
         elif(move == "moveToRoom"):
-            #move to room (and suggest) logic
-            print(req.media.get('testMes'), flush=True)
+            #move to room
+            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
+            #suggestion logic
+            self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
             pass
         elif(move == "suggest"):
             #suggestion logic
+            self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
             pass
         elif(move == "accuse"):
             #accusation logic
+            self.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
             pass
         else:
             #skip turn
@@ -235,8 +245,8 @@ class initResource(object):
             resp.body = json.dumps({ 'gameStarted' : "false" });
             resp.status = falcon.HTTP_200
         else:
-            startingPos1 = self.gs.players[player_id].location.adj_room[0].name
-            startingPos2 = self.gs.players[player_id].location.adj_room[1].name
+            startingPos1 = self.gs.players[player_id].location.adj_locs[0].name
+            startingPos2 = self.gs.players[player_id].location.adj_locs[1].name
             caseFileSuspect = self.gs.caseFile.suspect.name
             caseFileWeapon = self.gs.caseFile.weapon.name
             caseFileRoom = self.gs.caseFile.room.name

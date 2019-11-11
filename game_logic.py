@@ -63,14 +63,15 @@ class Room:
         self.name = name
         self. corner_room = corner_room
         #self.adj_room = []
-        self.adj_hall = []
+        self.adj_locs = []
         self.exits = True
         self.chars_in_room = []
         self.type = 1
         
 class Hallway:
-    def __init__(self, adj_room):
-        self.adj_room = adj_room
+    def __init__(self, adj_locs):
+        self.name = adj_locs[0].name + " to " + adj_locs[1].name
+        self.adj_locs = adj_locs
         self.type = 0
 
 class CaseFile:
@@ -202,18 +203,29 @@ def roomInitialization():
     
 def hallwayInitialization(room):
     hallway = []
-    hallway.append(Hallway([room[0], room[1]])) #study to hall
+    hallway.append(Hallway([room[0], room[1]])) #study to hall 0
     hallway.append(Hallway([room[1], room[2]])) #hall to lounge
     hallway.append(Hallway([room[2], room[3]])) #lounge to dining room
     hallway.append(Hallway([room[3], room[4]])) #dining room to kitchen
     hallway.append(Hallway([room[4], room[5]])) #kitchen to ballroom
-    hallway.append(Hallway([room[5], room[6]])) #ballroom to conservatory
+    hallway.append(Hallway([room[5], room[6]])) #ballroom to conservatory 5
     hallway.append(Hallway([room[6], room[7]])) #conservatory to library
     hallway.append(Hallway([room[7], room[0]])) #library to study
     hallway.append(Hallway([room[1], room[8]])) #hall to billiard room
     hallway.append(Hallway([room[3], room[8]])) #dining room to billiard room
-    hallway.append(Hallway([room[5], room[8]])) #ballroom to billiard room
+    hallway.append(Hallway([room[5], room[8]])) #ballroom to billiard room 10
     hallway.append(Hallway([room[7], room[8]])) #library to billiard room
+    
+    room[0].adj_locs = [hallway[0], hallway[7]]
+    room[1].adj_locs = [hallway[0], hallway[1], hallway[8]]
+    room[2].adj_locs = [hallway[1], hallway[2]]
+    room[3].adj_locs = [hallway[2], hallway[3], hallway[9]]
+    room[4].adj_locs = [hallway[3] hallway[4]]
+    room[5].adj_locs = [hallway[4], hallway[5], hallway[10]]
+    room[6].adj_locs = [hallway[5], hallway[6]]
+    room[7].adj_locs = [hallway[6], hallway[7], hallway[11]]
+    room[8].adj_locs = [hallway[8], hallway[9], hallway[10], hallway[11]]
+    
     
 #    hallway[0] = Hallway([room[0], room[1]]) #study to hall
 #    hallway[1] = Hallway([room[1], room[2]]) #hall to lounge
