@@ -197,6 +197,25 @@ class MoveResource(object):
             "This is not a valid move."
             )
         
+        if(move == "moveToHallway"):
+            #move to hallway logic
+            print(req.media.get('testMes'), flush=True)
+            pass
+        elif(move == "moveToRoom"):
+            #move to room (and suggest) logic
+            print(req.media.get('testMes'), flush=True)
+            pass
+        elif(move == "suggest"):
+            #suggestion logic
+            pass
+        elif(move == "accuse"):
+            #accusation logic
+            pass
+        else:
+            #skip turn
+            pass    
+        
+        
         self.gs.nextTurn(player_id)
         
         random_move = " moved from room to hallway."

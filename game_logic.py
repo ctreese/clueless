@@ -36,21 +36,27 @@ class Player:
                 #or they could make an accusation
                 print("You have been blocked in a room. Your turn will be skipped.")
                 #return some integer code signalling this is the situation
-                return ["accuse"]
+                return ["accuse","skip"]
             elif self.location.exits is False and self.suggested is True:
                 #player can only make a suggestion
                 #or they could make an accusation
                 print("You are blocked in a room, but were moved there by a suggestion. Thus, you can only make a suggestion.")
                 #return some integer code signalling this is the situation
                 return ["suggest", "accuse"]
+            elif self.location.exits is True and self.suggested is True:
+                #player can make a suggestion or leave room
+                #or they could make an accusation
+                print("You are in a room, but were moved there by a suggestion. Thus, you can make a suggestion.")
+                #return some integer code signalling this is the situation
+                return ["moveToHallway", "suggest", "accuse"]
             else:
                 print("You can move out of the room or make a accusation.")
                 #return some integer code signalling this is the situation
-                return ["move", "accuse"]
+                return ["moveToHallway", "accuse"]
         else:
             #they can do whatever
             print("You can move into a room or make a accusation.")
-            return ["move", "accuse"]
+            return ["moveToRoom", "accuse"]
             
 class Room:
     def __init__(self, name, corner_room):
