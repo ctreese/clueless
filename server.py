@@ -11,7 +11,8 @@ import game_logic
 class Gamestate(object):
 
     playerList = []
-    avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-While", "Colonel-Mustard"]
+    avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-White", "Colonel-Mustard"]
+    playerTurn = ""
     gameStarted = False
     
     cards = []
@@ -39,15 +40,16 @@ class Gamestate(object):
     def get_gamestate(self):
         return True
         
-    def reinit_gamestate(self):
+    def init_gamestate(self):
         self.cards = game_logic.cardInitialization()
         self.rooms = game_logic.roomInitialization()
         self.hallways = game_logic.hallwayInitialization(self.rooms)
         self.players = game_logic.playerInitialization(self.hallways, self.playerList)
         self.deck = game_logic.Deck(self.players,self.cards)
-        self.caseFile = game_logic.deck.deal()
+        self.caseFile = self.deck.deal()
         self.board = game_logic.Board(self.rooms, self.hallways, self.caseFile)
-        gameStarted = True
+        self.playerTurn = random.choice(self.playerList)
+        self.gameStarted = True
 
 
 class RegisterResource(object):
@@ -84,15 +86,18 @@ class TurnResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
         if(player_id not in self.gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
             "That player name is not currently registered"
             )
-        player_turn = random.choice(self.gs.avaliableCharacters)
-        resp.body = json.dumps(self.gs.get_playerlist())
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'playerturn': player_turn });
+        resp.body = json.dumps({ 'playerturn': self.gs.playerTurn });
         resp.status = falcon.HTTP_200
 
 class OptionsResource(object):
@@ -102,6 +107,11 @@ class OptionsResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
         if(player_id not in self.gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
@@ -119,6 +129,11 @@ class LegalityResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id, move):
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
         if(player_id not in self.gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
@@ -135,6 +150,11 @@ class MoveResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_post(self, req, resp, player_id):
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
         if(player_id not in self.gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
@@ -165,20 +185,23 @@ class initResource(object):
             numPlayers = self.gs.deck.numPlayers
             cardsList = []
             for card in self.gs.players[player_id].hand:
-                cardList.append(card.name)
+                cardsList.append(card.name)
                 
             resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'caseFileSuspect' : caseFileSuspect, 'caseFileWeapon' : caseFileWeapon, \
                 'caseFileRoom' : caseFileRoom, 'numPlayers' : numPlayers, 'cardList' : cardsList})
             resp.status = falcon.HTTP_200
 
-    def on_post(self, req, resp):
+    def on_post(self, req, resp, player_id):
         resp.set_header('Powered-By', 'Falcon')
         #resp.body = '{}'
+        if len(self.gs.playerList) < 2:
+            raise falcon.HTTPInternalServerError(
+            "Insufficent Players Registered",
+            "Not enough players are currently registered.  Please register at least 2 players."
+            )
         character_list = ''
-        self.gs.reinit_gamestate()
-        for character in self.gs.avaliableCharacters:
-            character_list = character_list + ' ' + character
-        resp.body = json.dumps({ 'info' : character_list });
+        self.gs.init_gamestate()
+        resp.body = json.dumps({ 'info' : self.gs.playerList });
         resp.status = falcon.HTTP_201
 
 class CORSComponent(object):
@@ -226,7 +249,7 @@ app.add_route('/turn/{player_id}', turn)
 app.add_route('/options/{player_id}', gameOptions)
 app.add_route('/legality/{player_id}/{move}', legality)
 app.add_route('/move/{player_id}', move)
-app.add_route('/init', gameInit)
+app.add_route('/init/{player_id}', gameInit)
 
 # Useful for debugging problems in your API; works with pdb.set_trace(). You
 # can also use Gunicorn to host your app. Gunicorn can be configured to

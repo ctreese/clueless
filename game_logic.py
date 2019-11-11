@@ -98,9 +98,11 @@ class Deck:
                 self.cards.remove(location_card)
         case_file = CaseFile(character_card, weapon_card, location_card)
         i = 0
+        playerNames = list(self.Players.keys())
         while len(self.cards) > 0:
+            playerDealtTo = playerNames[i]
             dealt_card = random.choice(self.cards)
-            self.Players[i].hand.append(dealt_card)
+            self.Players[playerDealtTo].hand.append(dealt_card)
             self.cards.remove(dealt_card)
             i += 1
             if i > (self.numPlayers -1):
