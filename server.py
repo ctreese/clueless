@@ -218,7 +218,9 @@ class MoveResource(object):
             info = player_id + "moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
             info += self.gs.makeSuggestion(req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location.name)
-            pass
+        elif(move == "secretPassage"):
+            self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
+            info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + "."
         elif(move == "suggest"):
             #suggestion logic
             info = self.gs.makeSuggestion(req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location.name)

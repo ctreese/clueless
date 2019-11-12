@@ -31,28 +31,14 @@ class Player:
             print("You have already made an accusation. You can only move and respond to accusations")
             return []
         if self.location.type == 1: #location type 1 will designate a room. 0 will be a hallway
-            if self.location.exits is False and self.suggested is not True:
-                #this means the player put themselves in room and therefore will have their turn skiped
-                #or they could make an accusation
-                print("You have been blocked in a room. Your turn will be skipped.")
-                #return some integer code signalling this is the situation
-                return ["accuse","skip"]
-            elif self.location.exits is False and self.suggested is True:
-                #player can only make a suggestion
-                #or they could make an accusation
-                print("You are blocked in a room, but were moved there by a suggestion. Thus, you can only make a suggestion.")
-                #return some integer code signalling this is the situation
-                return ["suggest", "accuse"]
-            elif self.location.exits is True and self.suggested is True:
-                #player can make a suggestion or leave room
-                #or they could make an accusation
-                print("You are in a room, but were moved there by a suggestion. Thus, you can make a suggestion.")
-                #return some integer code signalling this is the situation
-                return ["moveToHallway", "suggest", "accuse"]
-            else:
-                print("You can move out of the room or make a accusation.")
-                #return some integer code signalling this is the situation
-                return ["moveToHallway", "accuse"]
+            legalMoves = ["accuse"]
+            if self.location.corner_room:
+                legalMoves.append("secretPassage")
+            if self.suggested:
+                legalMoves.append("suggest")
+            if self.locations.exits:
+                legalMoves.append("moveToHallway")
+            return legalMoves
         else:
             #they can do whatever
             print("You can move into a room or make a accusation.")
@@ -61,7 +47,7 @@ class Player:
 class Room:
     def __init__(self, name, corner_room):
         self.name = name
-        self. corner_room = corner_room
+        self.corner_room = corner_room
         #self.adj_room = []
         self.adj_locs = []
         self.exits = True
