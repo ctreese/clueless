@@ -82,7 +82,10 @@ class Gamestate(object):
             return "You have won the game!"
         else:
             return "Sorry, that is incorrect."
-        
+       
+#/register
+#GET: Assigns the client a player, and adds that player to the next started game
+#Each client should only call this method ONCE, and should remember its assigned player_id
 class RegisterResource(object):
 
     def __init__(self, db):
@@ -97,6 +100,9 @@ class RegisterResource(object):
         resp.body = json.dumps({ 'playername': player });
         resp.status = falcon.HTTP_200
 
+#/deregister/{player_id}
+#GET: Removes the given player_id from any subsequent games
+#This method can be called multiple times, and should be called when a client disconnects from the game
 class DeregisterResource(object):
 
     def __init__(self, db):
@@ -109,7 +115,9 @@ class DeregisterResource(object):
         resp.body = '{}'
         resp.status = falcon.HTTP_200
 
-
+#/turn/{player_id}
+#GET: Returns what players turn it currently is
+#This should be called periodically by the client, so that it knows when it is ready to receive plyer input
 class TurnResource(object):
 
     def __init__(self, db):
@@ -131,6 +139,9 @@ class TurnResource(object):
         resp.body = json.dumps({ 'playerturn': self.gs.playerTurn });
         resp.status = falcon.HTTP_200
 
+#/options/{player_id}
+#GET: returns legal moves, adjacent rooms, and the list of seen cards
+#This should be called by the client after a call to the turn method indicates it is the players turn
 class OptionsResource(object):
 
     def __init__(self, db):
@@ -160,6 +171,9 @@ class OptionsResource(object):
         resp.body = json.dumps({ 'move_options' : options, 'adj' : moveCandidates, 'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
 
+#/legality/{player_id}/{move}
+#GET: returns the validity of the given move for the given player
+#this is somewhat redundant with the options method currently
 class LegalityResource(object):
 
     def __init__(self, db):
@@ -185,6 +199,19 @@ class LegalityResource(object):
             resp.body = '{INVALID}'
             resp.status = falcon.HTTP_200
 
+#/move/{player_id}/{move}
+#POST: Attempts to execute the given move for the given player.  There are 6 possible moves, not all of which will be valid:
+#moveToHallway: Moves to a hallway connected to the current room. Takes the "adjIndex" argument in the request body
+#moveToRoom: Moves to the room connected to the current hallway, and makes a suggestion.  Takes the "adjIndex", "character" and "weapon" arguments in the request body
+#secretPassage: Moves to the room connected to the current room via the secret passage, and makes a suggestion.  Takes the "character" and "weapon" arguments in the request body
+#suggest: Makes a suggestion without moving to a new room. Takes the "character" and "weapon" arguments in the request body
+#accuse: Makes an accusation.  Takes the "character", "weapon", and "location" arguments in the request body
+#skip: skips the players turn.  Takes no arguments in the request body.
+#Arguments:
+#adjIndex: The index of the location in the adj_locs element of the Room/Hallway object we are navigating to.
+#character: The player name, with avaliable options defined in the gamestate object.
+#weapon: The weapon name, with avaliable options defined in the game_logic.py
+#location: The room name, with avaliable options defined in the game_logic.py
 class MoveResource(object):
 
     def __init__(self, db):
@@ -225,7 +252,8 @@ class MoveResource(object):
             info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
-            info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + "."
+            info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
+			info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "suggest"):
             #suggestion logic
             info = self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
@@ -246,6 +274,12 @@ class MoveResource(object):
         resp.body = json.dumps({ 'moveResult' : info });
         resp.status = falcon.HTTP_201
 
+#/init/{player_id}
+#GET: returns the starting gamestate for the given player, including the rooms adjacent to them, their starting hand, and the number of players
+#returns {gameStarted : false} if no clients have started the game via the post method yet
+#this should periodically be called by all registed clients
+#POST: starts (or restarts) the game.  At least 2 players must be registered.  Does not require a request body
+#this should be callable by all clients.
 class initResource(object):
 
     def __init__(self, db):
