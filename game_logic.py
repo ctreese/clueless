@@ -36,7 +36,7 @@ class Player:
                 legalMoves.append("secretPassage")
             if self.suggested:
                 legalMoves.append("suggest")
-            if self.locations.exits:
+            if self.location.exits:
                 legalMoves.append("moveToHallway")
             return legalMoves
         else:
@@ -243,21 +243,21 @@ def playerInitialization(hallway, playerList):
 #    player[5] = Player("Mrs. White", hallway[4])
     return player
 
-def performSuggestion(playerName, suspectName, weaponName, locationName, playerList):
+def performSuggestion(suspectName, weaponName, locationName, playerList):
     #TODO
-    return suggestionResponse(board, suspectName, locationName, weaponName, playerList)
+    return suggestionResponse(suspectName, locationName, weaponName, playerList)
     
 def suggestionResponse(suspectName, locationName, weaponName, playerList):
-    for player in board.players:
+    for player in playerList.values():
         for card in player.hand:
             if card.name == suspectName or card.name == locationName or card.name == weaponName:
                 return player.name + " has disproved the suggestion!"
     return "No one could disprove the suggestion!"
     
     
-def performAccusation(board, player):
+def performAccusation(board, player, suspectName, weaponName, roomName):
         
-    print("You have selected the following: ")
+    print(player.name + "has selected the following: ")
     print("Suspect: " + suspectName)
     print("Room: " + roomName)
     print("Weapon: " + weaponName)
@@ -271,11 +271,12 @@ def performAccusation(board, player):
         print("")
         print("The suspect was: " + board.caseFile.suspect.name)
         print("The room was: " + board.caseFile.room.name)
-        print("The weapon was: " + board.caseFile.weapon.name)
+        print("The weapon was: " + board.caseFile.weapon.name, flush=True)
         global game_over_flag 
         game_over_flag = 1
         return True
     else:
+        print(player.name + " was incorrect.", flush=True)
         player.accusation_made = True
         return False
 

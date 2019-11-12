@@ -65,18 +65,19 @@ class Gamestate(object):
             self.playerTurn = self.playerListActive[idx+1]
         #check to see if accusation has been made, if so skip turn
         if(self.players[self.playerTurn].accusation_made):
-            nextTurn(self, self.playerTurn)
+            self.nextTurn(self.playerTurn)
 
     def makeSuggestion(self, character, suspect, weapon, location):
         if suspect in self.playerListActive:
-            for player in self.players:
+            for player in self.players.values():
+                print(player, flush = True)
                 if player.name == suspect:
                     player.location = location
                     player.suggested = True
-        return game_logic.performSuggestion(suspect, weapon, location.name, self.playerListActive);
+        return game_logic.performSuggestion(suspect, weapon, location.name, self.players);
 
-    def makeAccusation(self, character, weapon, location):
-        gameWon = game_logic.performAccusation(character, weapon, location);
+    def makeAccusation(self, player_id, character, weapon, location):
+        gameWon = game_logic.performAccusation(self.board, self.players[player_id], character, weapon, location);
         if(gameWon):
             self.gameStarted = False
             return "You have won the game!"
@@ -242,17 +243,17 @@ class MoveResource(object):
         info = ""
         if(move == "moveToHallway"):
             #move to hallway logic
-            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
-            info = player_id + "moved from room to hallway"
+            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
+            info = player_id + " moved from room to hallway"
         elif(move == "moveToRoom"):
             #move to room
-            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
-            info = player_id + "moved from hallway to " + self.gs.players[player_id].location.name + ".  "
+            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
+            info = player_id + " moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
             info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
-            info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
+            info = player_id + " moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
             info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "suggest"):
             #suggestion logic
@@ -260,7 +261,7 @@ class MoveResource(object):
             pass
         elif(move == "accuse"):
             #accusation logic
-            info = self.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
+            info = self.gs.makeAccusation(player_id, req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
             pass
         else:
             pass
@@ -294,6 +295,9 @@ class initResource(object):
         else:
             startingPos1 = self.gs.players[player_id].location.adj_locs[0].name
             startingPos2 = self.gs.players[player_id].location.adj_locs[1].name
+            print("The suspect is: " + self.gs.board.caseFile.suspect.name)
+            print("The room is: " + self.gs.board.caseFile.room.name)
+            print("The weapon is: " + self.gs.board.caseFile.weapon.name, flush=True)
             numPlayers = self.gs.deck.numPlayers
             cardsList = []
             for card in self.gs.players[player_id].hand:
