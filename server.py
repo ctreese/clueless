@@ -68,11 +68,11 @@ class Gamestate(object):
             nextTurn(self, self.playerTurn)
 
     def makeSuggestion(self, character, suspect, weapon, location):
-		if suspect in self.playerListActive:
-			for player in self.players:
-				if player.name = suspect:
-					player.location = location
-					player.suggested = True
+        if suspect in self.playerListActive:
+            for player in self.players:
+                if player.name = suspect:
+                    player.location = location
+                    player.suggested = True
         return game_logic.performSuggestion(suspect, weapon, location.name, self.playerListActive);
 
     def makeAccusation(self, character, weapon, location):
@@ -241,7 +241,7 @@ class MoveResource(object):
         
         self.gs.nextTurn(player_id)
         self.gs.players[player_id].suggested = False
-		
+        
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'moveResult' : info });
         resp.status = falcon.HTTP_201

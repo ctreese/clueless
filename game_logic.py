@@ -243,11 +243,11 @@ def playerInitialization(hallway, playerList):
 #    player[5] = Player("Mrs. White", hallway[4])
     return player
 
-def performSuggestion(board, player, suspectName, weaponName, locationName):
+def performSuggestion(playerName, suspectName, weaponName, locationName, playerList):
     #TODO
-    return suggestionResponse(board, suspectName, locationName, weaponName)
+    return suggestionResponse(board, suspectName, locationName, weaponName, playerList)
     
-def suggestionResponse(board, suspectName, locationName, weaponName):
+def suggestionResponse(suspectName, locationName, weaponName, playerList):
     for player in board.players:
         for card in player.hand:
             if card.name == suspectName or card.name == locationName or card.name == weaponName:
