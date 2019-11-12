@@ -225,7 +225,7 @@ class MoveResource(object):
             pass
         elif(move == "accuse"):
             #accusation logic
-            info = elf.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
+            info = self.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
             pass
         else:
             pass
