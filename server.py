@@ -67,8 +67,13 @@ class Gamestate(object):
         if(self.players[self.playerTurn].accusation_made):
             nextTurn(self, self.playerTurn)
 
-    def makeSuggestion(self, character, weapon, location):
-        return game_logic.performSuggestion(character, weapon, location);
+    def makeSuggestion(self, character, suspect, weapon, location):
+		if suspect in self.playerListActive:
+			for player in self.players:
+				if player.name = suspect:
+					player.location = location
+					player.suggested = True
+        return game_logic.performSuggestion(suspect, weapon, location.name, self.playerListActive);
 
     def makeAccusation(self, character, weapon, location):
         gameWon = game_logic.performAccusation(character, weapon, location);
@@ -217,13 +222,13 @@ class MoveResource(object):
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
             info = player_id + "moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
-            info += self.gs.makeSuggestion(req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location.name)
+            info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
             info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + "."
         elif(move == "suggest"):
             #suggestion logic
-            info = self.gs.makeSuggestion(req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location.name)
+            info = self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
             pass
         elif(move == "accuse"):
             #accusation logic
@@ -235,8 +240,8 @@ class MoveResource(object):
         
         
         self.gs.nextTurn(player_id)
-        
-        random_move = " moved from room to hallway."
+        self.gs.players[player_id].suggested = False
+		
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'moveResult' : info });
         resp.status = falcon.HTTP_201
