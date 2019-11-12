@@ -70,7 +70,7 @@ class Gamestate(object):
     def makeSuggestion(self, character, suspect, weapon, location):
         if suspect in self.playerListActive:
             for player in self.players:
-                if player.name = suspect:
+                if player.name == suspect:
                     player.location = location
                     player.suggested = True
         return game_logic.performSuggestion(suspect, weapon, location.name, self.playerListActive);
@@ -253,7 +253,7 @@ class MoveResource(object):
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
             info = player_id + "moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
-			info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
+            info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "suggest"):
             #suggestion logic
             info = self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
@@ -294,16 +294,12 @@ class initResource(object):
         else:
             startingPos1 = self.gs.players[player_id].location.adj_locs[0].name
             startingPos2 = self.gs.players[player_id].location.adj_locs[1].name
-            caseFileSuspect = self.gs.caseFile.suspect.name
-            caseFileWeapon = self.gs.caseFile.weapon.name
-            caseFileRoom = self.gs.caseFile.room.name
             numPlayers = self.gs.deck.numPlayers
             cardsList = []
             for card in self.gs.players[player_id].hand:
                 cardsList.append(card.name)
                 
-            resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'caseFileSuspect' : caseFileSuspect, 'caseFileWeapon' : caseFileWeapon, \
-                'caseFileRoom' : caseFileRoom, 'numPlayers' : numPlayers, 'cardList' : cardsList})
+            resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'numPlayers' : numPlayers, 'cardList' : cardsList})
             resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp, player_id):
