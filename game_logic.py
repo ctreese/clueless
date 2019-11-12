@@ -220,7 +220,7 @@ def hallwayInitialization(room):
     room[1].adj_locs = [hallway[0], hallway[1], hallway[8]]
     room[2].adj_locs = [hallway[1], hallway[2]]
     room[3].adj_locs = [hallway[2], hallway[3], hallway[9]]
-    room[4].adj_locs = [hallway[3] hallway[4]]
+    room[4].adj_locs = [hallway[3], hallway[4]]
     room[5].adj_locs = [hallway[4], hallway[5], hallway[10]]
     room[6].adj_locs = [hallway[5], hallway[6]]
     room[7].adj_locs = [hallway[6], hallway[7], hallway[11]]
@@ -288,10 +288,10 @@ def performAccusation(board, player):
         print("The weapon was: " + board.caseFile.weapon.name)
         global game_over_flag 
         game_over_flag = 1
-		return True
+        return True
     else:
         player.accusation_made = True
-		return False
+        return False
 
 
 
