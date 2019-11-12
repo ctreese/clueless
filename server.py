@@ -68,10 +68,15 @@ class Gamestate(object):
             nextTurn(self, self.playerTurn)
 
     def makeSuggestion(self, character, weapon, location):
-        pass
+		return game_logic.performSuggestion(character, weapon, location);
 
     def makeAccusation(self, character, weapon, location):
-        pass
+		gameWon = game_logic.performAccusation(character, weapon, location);
+		if(gameWon):
+			self.gameStarted = False
+			return "You have won the game!"
+		else:
+			return "Sorry, that is incorrect."
         
 class RegisterResource(object):
 
@@ -202,35 +207,35 @@ class MoveResource(object):
             "Invalid Move",
             "This is not a valid move."
             )
-        
+        info = ""
         if(move == "moveToHallway"):
             #move to hallway logic
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
-            pass
+			info = player_id + "moved from room to hallway"
         elif(move == "moveToRoom"):
             #move to room
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[req.media.get('adjIndex')]
+			info = player_id + "moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
-            self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
+            info += self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
             pass
         elif(move == "suggest"):
             #suggestion logic
-            self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
+            info = self.gs.makeSuggestion(req.media.get('character')s, req.media.get('weapon'), self.gs.players[player_id].location.name)
             pass
         elif(move == "accuse"):
             #accusation logic
-            self.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
+            info = elf.gs.makeAccusation(req.media.get('character'), req.media.get('weapon'), req.media.get('location'))
             pass
         else:
             #skip turn
-            pass    
         
         
         self.gs.nextTurn(player_id)
         
         random_move = " moved from room to hallway."
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'move' : random_move });
+        resp.body = json.dumps({ 'moveResult' : info });
         resp.status = falcon.HTTP_201
 
 class initResource(object):

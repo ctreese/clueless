@@ -257,56 +257,42 @@ def playerInitialization(hallway, playerList):
 #    player[5] = Player("Mrs. White", hallway[4])
     return player
 
-def performTurn(player):
-    option = player.getLegalMoves()
-    if option == 1:
-        response = -1
-        #while response != 1 and response != 2 and response != 3 and response != 4:
-        response = input("Choose from the following options: \n1. Move to " + player.location.adj_room[0].name + "\n2. Move to " +  player.location.adj_room[1].name + "\n3. Make suggestion \n4. Make accusation \n")
-        print(response)
+def performSuggestion(board, player, suspectName, weaponName, locationName):
+    #TODO
+    return suggestionResponse(board, suspectName, locationName, weaponName)
     
+def suggestionResponse(board, suspectName, locationName, weaponName):
+    for player in board.players:
+        for card in player.hand:
+            if card.name == suspectName or card.name == locationName or card.name == weaponName:
+                return player.name + " has disproved the suggestion!"
+    return "No one could disprove the suggestion!"
+    
+    
+def performAccusation(board, player):
+        
+    print("You have selected the following: ")
+    print("Suspect: " + suspectName)
+    print("Room: " + roomName)
+    print("Weapon: " + weaponName)
+    
+    if board.caseFile.suspect.name == suspectName and board.caseFile.room.name == roomName and board.caseFile.weapon.name == weaponName:
+        
+        print("")
+        print("*****************************************")   
+        print(player.name + " has won the game!")
+        print("*****************************************") 
+        print("")
+        print("The suspect was: " + board.caseFile.suspect.name)
+        print("The room was: " + board.caseFile.room.name)
+        print("The weapon was: " + board.caseFile.weapon.name)
+        global game_over_flag 
+        game_over_flag = 1
+		return True
+    else:
+        player.accusation_made = True
+		return False
 
-def gameLoop(board, players):
-   print("")
-   print("*****************************************")   
-   print("**********GAME IS NOW STARTING!**********") 
-   print("*****************************************") 
-   print("")
-   i = 0
-   j = 0
-   game_over_flag = 0
-   while game_over_flag != 1 and i < 20:
-       print("It is " + players[j].name + "'s turn!")
-       performTurn(players[j])
-       
-       i += 1
-       j += 1
-       if j > (len(players) -1):
-           j = 0
-       
-   
-def gameInitialization():
-    cards = cardInitialization()
-    rooms = roomInitialization()
-    hallways = hallwayInitialization(rooms)
-    players = playerInitialization(hallways)
-    deck = Deck(players,cards)
-    caseFile = deck.deal()
-    board = Board(rooms, hallways, caseFile)
-    
-    print("You are playing as: " + players[0].name)
-    print(players[0].name + " is starting in the hallway between the " + players[0].location.adj_room[0].name + " and the " + players[0].location.adj_room[1].name)
-    print("The case file contains the following cards: " + caseFile.suspect.name + ", " + caseFile.weapon.name + ", " + caseFile.room.name)
-    print("The number of players in the game is: ", deck.numPlayers)
-    print("The cards in your hand are: ")
-    for card in players[0].hand:
-        print(card.name)
-        
-    #gameLoop(board, players) #calls the main game loop... this will loop through players turns until the game is won
-    
-        
-#gameInitialization()
-#gameLoop()
 
 
         
