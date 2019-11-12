@@ -181,6 +181,8 @@ def roomInitialization():
     room.append(Room("Library",0))
     room.append(Room("Billard Room",0))
     
+
+    
 #    room[0]= Room("Study",1)
 #    room[1] = Room("Hall",0)
 #    room[2] = Room("Lounge",1)
@@ -194,18 +196,18 @@ def roomInitialization():
     
 def hallwayInitialization(room):
     hallway = []
-    hallway.append(Hallway([room[0], room[1]])) #study to hall
-    hallway.append(Hallway([room[1], room[2]])) #hall to lounge
-    hallway.append(Hallway([room[2], room[3]])) #lounge to dining room
-    hallway.append(Hallway([room[3], room[4]])) #dining room to kitchen
-    hallway.append(Hallway([room[4], room[5]])) #kitchen to ballroom
-    hallway.append(Hallway([room[5], room[6]])) #ballroom to conservatory
-    hallway.append(Hallway([room[6], room[7]])) #conservatory to library
-    hallway.append(Hallway([room[7], room[0]])) #library to study
-    hallway.append(Hallway([room[1], room[8]])) #hall to billiard room
-    hallway.append(Hallway([room[3], room[8]])) #dining room to billiard room
-    hallway.append(Hallway([room[5], room[8]])) #ballroom to billiard room
-    hallway.append(Hallway([room[7], room[8]])) #library to billiard room
+    hallway.append(Hallway([room[0], room[1]])) #study to hall 0
+    hallway.append(Hallway([room[1], room[2]])) #hall to lounge 1
+    hallway.append(Hallway([room[2], room[3]])) #lounge to dining room 2
+    hallway.append(Hallway([room[3], room[4]])) #dining room to kitchen 3
+    hallway.append(Hallway([room[4], room[5]])) #kitchen to ballroom 4
+    hallway.append(Hallway([room[5], room[6]])) #ballroom to conservatory 5
+    hallway.append(Hallway([room[6], room[7]])) #conservatory to library 6
+    hallway.append(Hallway([room[7], room[0]])) #library to study 7
+    hallway.append(Hallway([room[1], room[8]])) #hall to billiard room 8
+    hallway.append(Hallway([room[3], room[8]])) #dining room to billiard room 9
+    hallway.append(Hallway([room[5], room[8]])) #ballroom to billiard room 10
+    hallway.append(Hallway([room[7], room[8]])) #library to billiard room 11
     
 #    hallway[0] = Hallway([room[0], room[1]]) #study to hall
 #    hallway[1] = Hallway([room[1], room[2]]) #hall to lounge
@@ -238,15 +240,95 @@ def playerInitialization(hallway):
 #    player[4] = Player("Miss Scarlett", hallway[1])
 #    player[5] = Player("Mrs. White", hallway[4])
     return player
+    
+def roomHallwayInitilization(rooms, hallways):
 
-def performTurn(player):
+    rooms[0].adj_hall.append(hallways[0])
+    rooms[0].adj_hall.append(hallways[7])
+ 
+    rooms[1].adj_hall.append(hallways[0])
+    rooms[1].adj_hall.append(hallways[1])
+    rooms[1].adj_hall.append(hallways[8])
+    
+    rooms[2].adj_hall.append(hallways[1])
+    rooms[2].adj_hall.append(hallways[2])
+
+    rooms[3].adj_hall.append(hallways[2])
+    rooms[3].adj_hall.append(hallways[3])
+    rooms[3].adj_hall.append(hallways[11])
+
+    rooms[1].adj_hall.append(hallways[1])
+
+    rooms[4].adj_hall.append(hallways[3])
+    rooms[4].adj_hall.append(hallways[4])
+
+    rooms[5].adj_hall.append(hallways[4])
+    rooms[5].adj_hall.append(hallways[5])
+    rooms[5].adj_hall.append(hallways[10])
+
+    rooms[6].adj_hall.append(hallways[5])
+    rooms[6].adj_hall.append(hallways[6])
+
+    rooms[7].adj_hall.append(hallways[6])
+    rooms[7].adj_hall.append(hallways[7])
+    rooms[7].adj_hall.append(hallways[9])
+    
+    rooms[8].adj_hall.append(hallways[11])
+    rooms[8].adj_hall.append(hallways[10])
+    rooms[8].adj_hall.append(hallways[9])
+    rooms[8].adj_hall.append(hallways[8])
+
+    return rooms
+
+def performTurn(player, board):
     option = player.getLegalMoves()
     if option == 1:
         response = -1
         #while response != 1 and response != 2 and response != 3 and response != 4:
         response = input("Choose from the following options: \n1. Move to " + player.location.adj_room[0].name + "\n2. Move to " +  player.location.adj_room[1].name + "\n3. Make suggestion \n4. Make accusation \n")
         print(response)
-    
+        if response == "1":
+            player.location = player.location.adj_room[0]
+        if response == "2":
+            player.location = player.location.adj_room[1]
+        print("Move " + player.name + " to the " + player.location.name)  
+    if option == 0:
+        response = -1
+        optionIdx = []
+        optionLoc = []
+        idx = 0
+        i = 0
+        # Find all possible moves if in a room
+        while i < len(player.location.adj_hall):
+
+            if player.location.adj_hall[i].adj_room[0] != player.location:
+                optionIdx.append(idx)
+                print("Move towards " + player.location.adj_hall[i].adj_room[0].name)
+                optionLoc.append(player.location.adj_hall[i])
+                idx = idx + 1
+            else:
+                optionIdx.append(idx)
+                print("Move towards " + player.location.adj_hall[i].adj_room[1].name)
+                optionLoc.append(player.location.adj_hall[i])
+                idx = idx + 1
+            i = i + 1
+        if player.location.corner_room == 1:
+            optionIdx.append(idx)
+            optionLoc.append(board.rooms[8])
+            print("Move to Billard Room")
+            idx = idx + 1
+        
+        print("Make suggestion")
+        print("Make Accusation")
+       
+        response = input()
+        print(response)
+        # Move player if there response was a move
+        responseIdx = int(response)-1
+        if responseIdx <= idx-1:
+            player.location = optionLoc[responseIdx]
+
+
 
 def gameLoop(board, players):
    print("")
@@ -259,7 +341,7 @@ def gameLoop(board, players):
    game_over_flag = 0
    while game_over_flag != 1 and i < 20:
        print("It is " + players[j].name + "'s turn!")
-       performTurn(players[j])
+       performTurn(players[j], board)
        
        i += 1
        j += 1
@@ -272,6 +354,7 @@ def gameInitialization():
     rooms = roomInitialization()
     hallways = hallwayInitialization(rooms)
     players = playerInitialization(hallways)
+    rooms = roomHallwayInitilization(rooms, hallways)
     deck = Deck(players,cards)
     caseFile = deck.deal()
     board = Board(rooms, hallways, caseFile)
