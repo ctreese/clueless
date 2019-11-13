@@ -10,18 +10,16 @@ from game_logic import *
 class Game(object):
 
 
-    def __init__():
-
-
+    def __init__(self):
         #TODO: get this done
         def player_init_phase():
             return
 
         self.cards = cardInitialization()
         self.rooms = roomInitialization()
-        self.hallways = hallwayInitialization(rooms)
-        self.avaliableCharacters = playerInitialization(hallways)
-        self.rooms = roomHallwayInitilization(rooms, hallways)
+        self.hallways = hallwayInitialization(self.rooms)
+        self.avaliableCharacters = playerInitialization(self.hallways)
+        self.rooms = roomHallwayInitilization(self.rooms, self.hallways)
         self.deck = Deck(players,cards)
         self.caseFile = deck.deal()
         self.board = Board(rooms, hallways, caseFile)
@@ -193,7 +191,7 @@ class MoveResource(object):
             resp.body = json.dumps({ 'move' : move_number });
             resp.status = falcon.HTTP_201
 
-            if gs.game_over_flag = 0:
+            if gs.game_over_flag == 0:
                 resp.set_header('Powered-By', 'Falcon')
                 resp.body = json.dumps({ 'move' : "game is over" });
                 resp.status = falcon.HTTP_201
