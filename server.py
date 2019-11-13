@@ -20,20 +20,11 @@ class Game(object):
         self.hallways = hallwayInitialization(self.rooms)
         self.avaliableCharacters = playerInitialization(self.hallways)
         self.rooms = roomHallwayInitilization(self.rooms, self.hallways)
-        self.deck = Deck(players,cards)
-        self.caseFile = deck.deal()
-        self.board = Board(rooms, hallways, caseFile)
+
         self.playerList = []
         self.turn_number = 0
         self.game_over_flag = 0
 
-        print("You are playing as: " + players[0].name)
-        print(players[0].name + " is starting in the hallway between the " + players[0].location.adj_room[0].name + " and the " + players[0].location.adj_room[1].name)
-        print("The case file contains the following cards: " + caseFile.suspect.name + ", " + caseFile.weapon.name + ", " + caseFile.room.name)
-        print("The number of players in the game is: ", deck.numPlayers)
-        print("The cards in your hand are: ")
-        for card in players[0].hand:
-            print(card.name)
 
     def get_playerlist(self):
         return self.playerList
@@ -89,6 +80,18 @@ class StartResource(object):
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'started': "Game has started" });
         resp.status = falcon.HTTP_200
+        self.gs.deck = Deck(self.gs.playerList,self.cards)
+        self.gs.caseFile = deck.deal()
+        self.board = Board(self.rooms, self.hallways, self.caseFile)
+
+
+        print("You are playing as: " + self.gs.playerList[0].name)
+        print(self.gs.playerList[0].name + " is starting in the hallway between the " + self.gs.playerList[0].location.adj_room[0].name + " and the " + self.gs.playerList[0].location.adj_room[1].name)
+        print("The case file contains the following cards: " + self.gs.caseFile.suspect.name + ", " + self.gs.caseFile.weapon.name + ", " + self.gs.caseFile.room.name)
+        print("The number of players in the game is: ", len(self.gs.playerList()))
+        print("The cards in your hand are: ")
+        for card in self.gs.playerList[0].hand:
+            print(card.name)
 
 # # TODO: FIX THIS LATER
 # class DeregisterResource(object):
@@ -169,9 +172,9 @@ class MoveResource(object):
         # TODO add move number legality check
         # TODO add player turn legality check
 
-        current_turn_number = gs.turn_number
-        num_players = len(gs.playerList)
-        current_player_name = gs.playerList[gs.turn_number % num_players]
+        current_turn_number = self.gs.turn_number
+        num_players = len(self.gs.playerList)
+        current_player_name = self.gs.playerList[self.gs.turn_number % num_players]
 
         if(player_id not in gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
@@ -196,7 +199,7 @@ class MoveResource(object):
                 resp.body = json.dumps({ 'move' : "game is over" });
                 resp.status = falcon.HTTP_201
             else:
-                performTurn(gs.playerList[gs.turn_number % num_players], gs.board)
+                performTurn(self.gs.playerList[self.gs.turn_number % num_players], self.gs.board)
 
 class consoleOutput(object):
 
