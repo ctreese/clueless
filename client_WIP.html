@@ -20,6 +20,13 @@
       <label>Enter your game server port here:</label>
       <input type="text" id="server-port" value="8000" />
     </div>
+
+    <div class="container">
+      <label>Current Game State</label>
+      <div id="game-state-container">
+        filler
+      </div>
+    </div>
     <div id="main" class="container">
         <table class="table table-striped">
             <tr><td style="width: 1px;"></td><td><b>Client Input</b></td><td><b>Server Output</b></td></tr>
@@ -31,7 +38,7 @@
                 <td><p><b id = "register_text" ></b></p></td>
 
             </tr>
-			<tr>
+			<!-- <tr>
 				<td style="width: 1px;"></td>
 				<td>
                     <button class="btn" onclick = "deregister()">Deregister</button>
@@ -62,21 +69,32 @@
                 </td>
                 <td><p><b id = "legality_text" ></b></p></td>
 
-            </tr>
+            </tr> -->
 			<tr>
 				<td style="width: 1px;"></td>
 				<td>
                     <button class="btn" onclick = "move()">Move</button>
                 </td>
+                <td>
+                  <label>Enter your move number here</label>
+                  <input type="text" id="move-number" value="8000" />
+                </td>
                 <td><p><b id = "move_text" ></b></p></td>
             </tr>
-			<tr>
+      <tr>
+        <td style="width: 1px;"></td>
+        <td>
+                    <button class="btn" onclick = "start()">Start</button>
+                </td>
+                <td><p><b id = "start_text" ></b></p></td>
+            </tr>
+			<!-- <tr>
 				<td style="width: 1px;"></td>
 				<td>
                     <button class="btn" onclick = "gameInit()">Initalize</button>
                 </td>
                 <td><p><b id = "gameInit_text" ></b></p></td>
-            </tr>
+            </tr> -->
         </table>
     </div>
     <script type="text/javascript">
@@ -93,6 +111,7 @@
 
     var ipAddress = document.getElementById('server-ip').value
     var port = document.getElementById('server-port').value
+    var move_number = document.getElementById('move-number').value
 
 		function register() {
 			if(playerName == "None") {
@@ -185,7 +204,7 @@
 
 		function move() {
 			$.ajax({
-				url: `http://${ipAddress}:${port}/move/${playerName}`,
+				url: `http://${ipAddress}:${port}/move/${playerName}/${move_number}`,
 				type: 'POST',
 				//data: //need to obtain charactername here
 				success: function(data) { //alert('Move completed')
@@ -216,6 +235,18 @@
 				document.getElementById('gameInit_text').innerHTML = gameInit_output;}
 			});
 		}
+
+    function move() {
+      $.ajax({
+        url: `http://${ipAddress}:${port}/start`,
+        type: 'GET',
+        //data: //need to obtain charactername here
+        success: function(data) { //alert('Move completed')
+        var start_output = playerName + data.started
+        document.getElementById('start_text').innerHTML = start_output
+        ; }
+      });
+    }
 
     </script>
 </body>
