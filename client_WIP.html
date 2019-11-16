@@ -28,233 +28,118 @@
       </div>
     </div>
     <div id="main" class="container">
-        <table class="table table-striped">
-            <tr><td style="width: 1px;"></td><td><b>Client Input</b></td><td><b>Server Output</b></td></tr>
-			<tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "register()">Register</button>
-                </td>
-                <td></td>
-                <td><p><b id = "register_text" ></b></p></td>
-
-            </tr>
-			<!-- <tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "deregister()">Deregister</button>
-                </td>
-                <td></td>
-                <td><p><b id = "deregister_text"></b></p></td>
-
-            </tr>
-			<tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "turns()">Turn</button>
-                </td>
-                <td></td>
-                <td><p><b id = "turn_text" ></b></p></td>
-
-            </tr>
-			<tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "gameOptions()">Turn Options</button>
-                </td>
-                <td></td>
-                <td><p><b id = "options_text"></b></p></td>
-
-            </tr>
-			<tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "legality()"> Legality</button>
-                </td>
-                <td></td>
-                <td><p><b id = "legality_text" ></b></p></td>
-
-            </tr> -->
-			<tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "move()">Move</button>
-                </td>
-                <td>
-                  <label>Enter your move number here</label>
-                  <input type="text" id="move-number" value="1" />
-                </td>
-                <td></td>
-                <td><p><b id = "move_text" ></b></p></td>
-            </tr>
-      <tr>
-        <td style="width: 1px;"></td>
-        <td>
-                    <button class="btn" onclick = "start()">Start</button>
-                </td>
-                <td></td>
-                <td><p><b id = "start_text" ></b></p></td>
-            </tr>
-			<!-- <tr>
-				<td style="width: 1px;"></td>
-				<td>
-                    <button class="btn" onclick = "gameInit()">Initalize</button>
-                </td>
-                <td></td>
-                <td><p><b id = "gameInit_text" ></b></p></td>
-            </tr> -->
+      <table class="table table-striped">
+        <tr>
+          <td style="width: 1px;"></td>
+          <td><b>Client Request</b></td>
+          <td><b>Client Input</b></td>
+          <td><b>Server Output</b></td>
+        </tr>
+			  <tr>
+  				<td style="width: 1px;"></td>
+  				<td>
+            <button class="btn" id="register-button">Register</button>
+          </td>
+          <td></td>
+          <td>
+            <p><b id="register-text"></b></p>
+          </td>
+        </tr>
+			  <tr>
+  				<td style="width: 1px;"></td>
+  				<td>
+            <button class="btn" id="move-button">Move</button>
+          </td>
+          <td>
+            <label>Enter your move number here</label>
+            <input type="text" id="move-number" value="1" />
+          </td>
+          <td></td>
+          <td><p><b id="move-response"></b></p></td>
+        </tr>
+        <tr>
+          <td style="width: 1px;"></td>
+          <td>
+            <button class="btn" id="start-button">Start</button>
+          </td>
+          <td></td>
+          <td><p><b id="start-response"></b></p></td>
+        </tr>
         </table>
     </div>
     <script type="text/javascript">
-        // application code here!
-		var playerName = "None"
-		var nextMove = "exampleMove";
-		//var register_output = "";
-		//var deregister_output = "";
-		//var turn_output = "";
-		//var gameOptions_output = "";
-		//var legality_output = "";
-		//var move_output = "";
-		//var gameInit_output = "";
 
-    var ipAddress = document.getElementById('server-ip').value
-    var port = document.getElementById('server-port').value
-    var move_number = document.getElementById('move-number').value
+      function update_data() {
+        player_name = document.getElementById('register-text').innerHTML
+        ip_address = document.getElementById('server-ip').value
+        port = document.getElementById('server-port').value
+        move_number = document.getElementById('move-number').value
+        move_data = {
+          player_name: player_name,
+          move: move_number
+        }
+        start_data = {
+          player_name: player_name
+        }
+      }
+  		function register() {
+        update_data()
+  			if(!player_name) {
+  				$.ajax({
+  					url: `http://${ip_address}:${port}/register`,
+  					type: 'GET',
+  					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
+  					success: function(data) {
+  						player_name = data.player_name;
+  						var register_output = 'Playings as: ' + player_name;
+  						document.getElementById('register-text').innerHTML = register_output;
+            }
+  				});
+  			}
+  		}
+  		function move() {
+        update_data()
+  			$.ajax({
+  				url: `http://${ip_address}:${port}/move/`,
+  				type: 'POST',
+          data: move_data,
+  				success: function(data) {
+    				var move_output = player_name + data.move;
+    				document.getElementById('move-text').innerHTML = move_output;
+  				}
+  			});
+  		}
+  		function start() {
+        update_data()
+  			$.ajax({
+  				url: `http://${ip_address}:${port}/start`,
+  				type: 'POST',
+          data: start_data,
+  				success: function(data) {
+    				var available_characters = data.info;
+    				var start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+    				document.getElementById('start-text').innerHTML = start_output;
+          }
+  			});
+  		}
 
-		function register() {
-			if(playerName == "None") {
-				$.ajax({
-					url: `http://${ipAddress}:${port}/register`,
-					type: 'GET',
-					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
-					success: function(data) {
-						playerName = data.playername;
-						var register_output = 'Playings as: ' + playerName
-						var deregister_output = ""
-						document.getElementById('legality_text').innerHTML = ""
-						document.getElementById('gameInit_text').innerHTML = ""
-						document.getElementById('move_text').innerHTML = ""
-						document.getElementById('options_text').innerHTML = ""
-						document.getElementById('turn_text').innerHTML = ""
-						document.getElementById('register_text').innerHTML = register_output
-						document.getElementById('deregister_text').innerHTML = deregister_output;}
-				});
-			}
-		}
+      let player_name = document.getElementById('register-text').innerHTML;
+      let ip_address = document.getElementById('server-ip').value;
+      let port = document.getElementById('server-port').value;
+      let move_number = document.getElementById('move-number').value;
+      let move_data = {
+        player_name: player_name,
+        move: move_number
+      };
+      let start_data = {
+        player_name: player_name
+      };
 
-		function deregister() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/deregister/${playerName}`,
-				type: 'GET',
-				//data: //need to obtain charactername here
-				success: function() {
-					var deregister_output = 'Deregistered player: ' + playerName
-					playerName = "None"
-					var register_output = 'Playings as: ' + playerName
-					document.getElementById('register_text').innerHTML = register_output
-					document.getElementById('legality_text').innerHTML = ""
-					document.getElementById('gameInit_text').innerHTML = ""
-					document.getElementById('move_text').innerHTML = ""
-					document.getElementById('options_text').innerHTML = ""
-					document.getElementById('turn_text').innerHTML = ""
-					document.getElementById('deregister_text').innerHTML = deregister_output;}
-			});
-		}
-
-		function turns() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/turn/${playerName}`,
-				type: 'GET',
-				//data: //need to obtain charactername here
-				success: function(data) {
-				//alert('something about turns')
-				var turn_output = "It is " + data.playerturn +"s turn."
-				document.getElementById('turn_text').innerHTML = turn_output
-				document.getElementById('options_text').innerHTML = ""
-				document.getElementById('legality_text').innerHTML = ""
-				document.getElementById('move_text').innerHTML = ""
-				document.getElementById('gameInit_text').innerHTML = ""
-				; }
-			});
-		}
-
-		function gameOptions() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/options/${playerName}`,
-				type: 'GET',
-				//data: //need to obtain charactername here
-				success: function(data) {
-				document.getElementById('options_text').innerHTML = data.move_options
-				document.getElementById('legality_text').innerHTML = ""
-				document.getElementById('move_text').innerHTML = ""
-				document.getElementById('turn_text').innerHTML = ""
-				document.getElementById('gameInit_text').innerHTML = "";
-				//alert('return options')
-				; }
-			});
-		}
-
-		function legality() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/legality/${playerName}/nextMove`,
-				type: 'GET',
-				//data: //need to obtain charactername here
-				success: function() {
-					//alert('return legality')
-					var legality_output = playerName + ' can perform the following move: ' + nextMove
-					document.getElementById('gameInit_text').innerHTML = ""
-					document.getElementById('move_text').innerHTML = ""
-					document.getElementById('options_text').innerHTML = ""
-					document.getElementById('turn_text').innerHTML = ""
-					document.getElementById('legality_text').innerHTML = legality_output;}
-			});
-		}
-
-		function move() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/move/${playerName}/${move_number}`,
-				type: 'POST',
-				//data: //need to obtain charactername here
-				success: function(data) { //alert('Move completed')
-				var move_output = playerName + data.move
-				document.getElementById('move_text').innerHTML = move_output
-				document.getElementById('legality_text').innerHTML = ""
-				document.getElementById('options_text').innerHTML = ""
-				document.getElementById('turn_text').innerHTML = ""
-				document.getElementById('gameInit_text').innerHTML = "";
-				; }
-			});
-		}
-
-		function gameInit() {
-			$.ajax({
-				url: `http://${ipAddress}:${port}/init`,
-				type: 'POST',
-				//data: //need to obtain charactername here
-				success: function(data) {
-				//alert('Info')
-				//var init_message = data.message
-				var available_characters = data.info;
-				var gameInit_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-				document.getElementById('legality_text').innerHTML = ""
-				document.getElementById('move_text').innerHTML = ""
-				document.getElementById('options_text').innerHTML = ""
-				document.getElementById('turn_text').innerHTML = ""
-				document.getElementById('gameInit_text').innerHTML = gameInit_output;}
-			});
-		}
-
-    function move() {
-      $.ajax({
-        url: `http://${ipAddress}:${port}/start`,
-        type: 'GET',
-        //data: //need to obtain charactername here
-        success: function(data) { //alert('Move completed')
-        var start_output = playerName + data.started
-        document.getElementById('start_text').innerHTML = start_output
-        ; }
+      $(document).ready(function() {
+        $('#register-button').click(register);
+        $('#move-button').click(move);
+        $('#start-button').click(start);
       });
-    }
 
     </script>
 </body>

@@ -7,6 +7,7 @@ import falcon
 
 from game_logic import *
 
+
 class Game(object):
 
 
@@ -19,12 +20,17 @@ class Game(object):
         self.rooms = roomInitialization()
         self.hallways = hallwayInitialization(self.rooms)
         self.avaliableCharacters = playerInitialization(self.hallways)
-        self.rooms = roomHallwayInitilization(self.rooms, self.hallways)
 
         self.playerList = []
         self.turn_number = 0
         self.game_over_flag = 0
 
+        self.has_started = False
+
+    def find_player(player_name):
+        found = next((player for player in test_list if player.name == player_name), None)
+        if not found:
+            raise Exception('Player not found')
 
     def get_playerlist(self):
         return self.playerList
@@ -39,23 +45,132 @@ class Game(object):
             self.playerList = [player for player in self.playerList if player.name!=playerName.name] # remove player via list comprehension
             self.avaliableCharacters.append(playerName)
 
-    def gameLoop():
-       print("")
-       print("*****************************************")
-       print("**********GAME IS NOW STARTING!**********")
-       print("*****************************************")
-       print("")
-       num_players = len(self.playerList)
-       while self.game_over_flag != 1 and self.turn_number < 20:
-           print("It is " + players[self.turn_number % num_players].name + "'s turn!")
-           performTurn(players[self.turn_number % num_players], self.board)
-           self.turn_number += 1
+    def performSuggestion(board, player):
+        #TODO
+        response = 0
+        suspects = []
+        while response < 1 or response >= numPlayers:
+            i = 1
+            print("The following players are suspects: ")
+            for suspect in board.players:
+                 if suspect.name != player.name:
+                     suspects.append(suspect)
+                     print("", i, ". " + suspect.name)
+                     i += 1
+            response = int(input("Please select a suspect (using numbers):"))
+        suspectName = suspects[response-1].name
+        suggestedPlayer = suspects[response-1]
+        #print("You selected: " + suspectName)
 
-    #placeholder
-    def get_gamestate(self):
-        return True
+        response = 0
+        while response < 1 or response > 6:
+            print("1. Candlestick")
+            print("2. Dagger")
+            print("3. Lead Pipe")
+            print("4. Revolver")
+            print("5. Rope")
+            print("6. Wrench")
+            response = int(input("Please select a weapon (using numbers):"))
+            #print(type(response))
+            #print("The response is: ", response)
+        weaponName = ""
+        if response == 1:
+            weaponName = "CandleStick"
+        elif response == 2:
+            weaponName = "Dagger"
+        elif response == 3:
+            weaponName = "Lead Pipe"
+        elif response == 4:
+            weaponName = "Revolver"
+        elif response == 5:
+            weaponName = "Rope"
+        elif response == 6:
+            weaponName = "Wrench"
 
-# Urgent
+        suggestedPlayer.location = player.location #moves suggested player into room
+        suggestionResponse(board, suspectName, player.location.name, weaponName)
+
+    def suggestionResponse(board, suspectName, locationName, weaponName):
+        for player in board.players:
+            for card in player.hand:
+                if card.name == suspectName or card.name == locationName or card.name == weaponName:
+                    print(player.name + " has disproved the suggestion!")
+                    return
+        print("No one could disprove the suggestion!")
+        return
+
+
+    def performAccusation(board, player):
+        #TODO
+        response = 0
+        suspects = []
+        while response < 1 or response >= numPlayers:
+            i = 1
+            print("The following players are suspects: ")
+            for suspect in board.players:
+                 if suspect.name != player.name:
+                     suspects.append(suspect)
+                     print("", i, ". " + suspect.name)
+                     i += 1
+            response = int(input("Please select a suspect (using numbers):"))
+        suspectName = suspects[response-1].name
+        #print("You selected: " + suspectName)
+        response = 0
+        while response < 1 or response > len(board.rooms):
+            i = 1
+            for room in board.rooms:
+                print("", i, ". " + room.name)
+                i += 1
+            response = int(input("Please select a room (using numbers):"))
+        roomName = board.rooms[response-1].name
+        #print("You selected: " + roomName)
+        response = 0
+        while response < 1 or response > 6:
+            print("1. Candlestick")
+            print("2. Dagger")
+            print("3. Lead Pipe")
+            print("4. Revolver")
+            print("5. Rope")
+            print("6. Wrench")
+            response = int(input("Please select a weapon (using numbers):"))
+            #print(type(response))
+            #print("The response is: ", response)
+        weaponName = ""
+        if response == 1:
+            weaponName = "CandleStick"
+        elif response == 2:
+            weaponName = "Dagger"
+        elif response == 3:
+            weaponName = "Lead Pipe"
+        elif response == 4:
+            weaponName = "Revolver"
+        elif response == 5:
+            weaponName = "Rope"
+        elif response == 6:
+            weaponName = "Wrench"
+
+        #print("You have selected the following: ")
+        print(player.name + "made the following accusation!")
+        print("Suspect: " + suspectName)
+        print("Room: " + roomName)
+        print("Weapon: " + weaponName)
+
+        if board.caseFile.suspect.name == suspectName and board.caseFile.room.name == roomName and board.caseFile.weapon.name == weaponName:
+
+            print("")
+            print("*****************************************")
+            print(player.name + " has won the game!")
+            print("*****************************************")
+            print("")
+            print("The suspect was: " + board.caseFile.suspect.name)
+            print("The room was: " + board.caseFile.room.name)
+            print("The weapon was: " + board.caseFile.weapon.name)
+            global game_over_flag
+            game_over_flag = 1
+        else:
+            print(player.name + "'s accusation was wrong!")
+            player.accusation_made = True
+
 class RegisterResource(object):
 
     def __init__(self, db):
@@ -67,8 +182,9 @@ class RegisterResource(object):
         self.gs.add_player(player)
         resp.set_header('Powered-By', 'Falcon')
         print(player.name)
-        resp.body = json.dumps({ 'playername': player.name });
+        resp.body = json.dumps({ 'player_name': player.name });
         resp.status = falcon.HTTP_200
+
 
 class StartResource(object):
 
@@ -77,90 +193,29 @@ class StartResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp):
-        resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'started': "Game has started" });
-        resp.status = falcon.HTTP_200
-        self.gs.deck = Deck(self.gs.playerList,self.cards)
-        self.gs.caseFile = deck.deal()
-        self.board = Board(self.rooms, self.hallways, self.caseFile)
+        def gameInitialization(self, req, resp):
+            resp.set_header('Powered-By', 'Falcon')
+            resp.body = json.dumps({ 'started': "Game has started" });
+            resp.status = falcon.HTTP_200
+            self.gs.deck = Deck(self.gs.playerList,self.cards)
+            self.gs.caseFile = deck.deal()
+            self.board = Board(self.rooms, self.hallways, self.caseFile)
 
+        def gameStartOutput(self, req, resp):
+            print("You are playing as: " + self.gs.playerList[-1].name)
+            print(self.gs.playerList[-1].name + " is starting in the hallway between the " + self.gs.playerList[-1].location.adj_room[0].name + " and the " + self.gs.playerList[-1].location.adj_room[1].name)
+            print("The case file contains the following cards: " + self.gs.caseFile.suspect.name + ", " + self.gs.caseFile.weapon.name + ", " + self.gs.caseFile.room.name)
+            print("The number of players in the game is: ", len(self.gs.playerList()))
+            print("The cards in your hand are: ")
+            for card in self.gs.playerList[-1].hand:
+                print(card.name)
 
-        print("You are playing as: " + self.gs.playerList[0].name)
-        print(self.gs.playerList[0].name + " is starting in the hallway between the " + self.gs.playerList[0].location.adj_room[0].name + " and the " + self.gs.playerList[0].location.adj_room[1].name)
-        print("The case file contains the following cards: " + self.gs.caseFile.suspect.name + ", " + self.gs.caseFile.weapon.name + ", " + self.gs.caseFile.room.name)
-        print("The number of players in the game is: ", len(self.gs.playerList()))
-        print("The cards in your hand are: ")
-        for card in self.gs.playerList[0].hand:
-            print(card.name)
-
-# # TODO: FIX THIS LATER
-# class DeregisterResource(object):
-#
-#     def __init__(self, db):
-#         self.gs = gs
-#         self.logger = logging.getLogger('thingsapp.' + __name__)
-#
-#     def on_get(self, req, resp, player_id):
-#         self.gs.remove_player(player_id)
-#         resp.set_header('Powered-By', 'Falcon')
-#         resp.body = '{}'
-#         resp.status = falcon.HTTP_200
-#
-# # TODO: FIX THIS LATER
-# class TurnResource(object):
-#
-#     def __init__(self, db):
-#         self.gs = gs
-#         self.logger = logging.getLogger('thingsapp.' + __name__)
-#
-#     def on_get(self, req, resp, player_id):
-#         if(player_id not in self.gs.get_playerlist()):
-#             raise falcon.HTTPBadRequest(
-#             "Invalid Player Name",
-#             "That player name is not currently registered"
-#             )
-#         player_turn = random.choice(self.gs.avaliableCharacters)
-#         resp.body = json.dumps(self.gs.get_playerlist())
-#         resp.set_header('Powered-By', 'Falcon')
-#         resp.body = json.dumps({ 'playerturn': player_turn });
-#         resp.status = falcon.HTTP_200
-#
-# # TODO: FIX THIS LATER
-# class OptionsResource(object):
-#
-#     def __init__(self, db):
-#         self.gs = gs
-#         self.logger = logging.getLogger('thingsapp.' + __name__)
-#
-#     def on_get(self, req, resp, player_id):
-#         if(player_id not in self.gs.get_playerlist()):
-#             raise falcon.HTTPBadRequest(
-#             "Invalid Player Name",
-#             "That player name is not currently registered"
-#             )
-#         options = "1. Move 2. Make Suggestion 3. Make Accusation"
-#         resp.set_header('Powered-By', 'Falcon')
-#         resp.body = json.dumps({ 'move_options' : options });
-#         resp.status = falcon.HTTP_200
-#
-# # TODO: FIX THIS LATER
-# class LegalityResource(object):
-#
-#     def __init__(self, db):
-#         self.gs = gs
-#         self.logger = logging.getLogger('thingsapp.' + __name__)
-#
-#     def on_get(self, req, resp, player_id, move):
-#         if(player_id not in self.gs.get_playerlist()):
-#             raise falcon.HTTPBadRequest(
-#             "Invalid Player Name",
-#             "That player name is not currently registered"
-#             )
-#         resp.set_header('Powered-By', 'Falcon')
-#         resp.body = '{}'
-#         resp.status = falcon.HTTP_200
-#
-
+        if not self.gs.has_started:
+            self.gameInitialization(req, resp)
+            self.gameStartOutput(req, resp)
+            self.gs.has_started = True
+        else:
+            self.gameStartOutput(req, resp)
 
 class MoveResource(object):
 
@@ -174,15 +229,13 @@ class MoveResource(object):
 
         current_turn_number = self.gs.turn_number
         num_players = len(self.gs.playerList)
-        current_player_name = self.gs.playerList[self.gs.turn_number % num_players]
+        current_player_name = self.gs.playerList[self.gs.turn_number % num_players].name
 
         if(player_id not in gs.get_playerlist()):
             raise falcon.HTTPBadRequest(
             "Invalid Player Name",
             "That player name is not currently registered"
             )
-
-
         elif(player_id is not current_player_name):
             raise falcon.HTTPBadRequest(
             "Invalid Move",
@@ -199,35 +252,8 @@ class MoveResource(object):
                 resp.body = json.dumps({ 'move' : "game is over" });
                 resp.status = falcon.HTTP_201
             else:
-                performTurn(self.gs.playerList[self.gs.turn_number % num_players], self.gs.board)
-
-class consoleOutput(object):
-
-    def __init__(self, db):
-        self.gs = gs
-        self.logger = logging.getLogger('thingsapp.' + __name__)
-
-    def on_get(self, req, resp):
-        resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'message': "Game has started" });
-        resp.status = falcon.HTTP_200
-
-# # TODO: FIX THIS LATER
-# class initResource(object):
-#
-#     def __init__(self, db):
-#         self.gs = gs
-#         self.logger = logging.getLogger('thingsapp.' + __name__)
-#
-#
-#     def on_post(self, req, resp):
-#         resp.set_header('Powered-By', 'Falcon')
-#         #resp.body = '{}'
-#         character_list = ''
-#         for character in self.gs.avaliableCharacters:
-#             character_list = character_list + ' ' + character
-#         resp.body = json.dumps({ 'info' : character_list });
-#         resp.status = falcon.HTTP_201
+                current_player = self.gs.find_player(current_player_name)
+                performTurn(self.gs.board, current_player, move_number)
 
 class CORSComponent(object):
     def process_response(self, req, resp, resource, req_succeeded):
@@ -260,27 +286,14 @@ app = falcon.API(middleware=[CORSComponent()])
 gs = Game()
 
 register = RegisterResource(gs)
-# deregister = DeregisterResource(gs)
-# turn = TurnResource(gs)
-# gameOptions = OptionsResource(gs)
-# legality = LegalityResource(gs)
 move = MoveResource(gs)
-# gameInit = initResource(gs)
-
 start = StartResource(gs)
-console_output = consoleOutput(gs)
 
 ### TODO: Add option select resource
 
 app.add_route('/register', register)
-# app.add_route('/deregister/{player_id}', deregister)
-# app.add_route('/turn/{player_id}', turn)
-# app.add_route('/options/{player_id}', gameOptions)
-# app.add_route('/legality/{player_id}/{move}', legality)
-app.add_route('/move/{player_id}/{move_number}', move)
+app.add_route('/move', move)
 app.add_route('/start', start)
-app.add_route('/consoleOutput', console_output)
-# app.add_route('/init', gameInit)
 
 # Useful for debugging problems in your API; works with pdb.set_trace(). You
 # can also use Gunicorn to host your app. Gunicorn can be configured to
