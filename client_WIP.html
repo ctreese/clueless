@@ -42,7 +42,7 @@
           </td>
           <td></td>
           <td>
-            <p><b id="register-text"></b></p>
+            <p><b id="register-response"></b></p>
           </td>
         </tr>
 			  <tr>
@@ -60,6 +60,14 @@
         <tr>
           <td style="width: 1px;"></td>
           <td>
+            <button class="btn" id="game-state-button">Start</button>
+          </td>
+          <td></td>
+          <td><p><b id="game-state-response"></b></p></td>
+        </tr>
+        <tr>
+          <td style="width: 1px;"></td>
+          <td>
             <button class="btn" id="start-button">Start</button>
           </td>
           <td></td>
@@ -70,7 +78,7 @@
     <script type="text/javascript">
 
       function update_data() {
-        player_name = document.getElementById('register-text').innerHTML
+        player_name = document.getElementById('register-response').innerHTML
         ip_address = document.getElementById('server-ip').value
         port = document.getElementById('server-port').value
         move_number = document.getElementById('move-number').value
@@ -79,6 +87,9 @@
           move: move_number
         }
         start_data = {
+          player_name: player_name
+        }
+        game_state_data = {
           player_name: player_name
         }
       }
@@ -92,11 +103,34 @@
   					success: function(data) {
   						player_name = data.player_name;
   						var register_output = 'Playings as: ' + player_name;
-  						document.getElementById('register-text').innerHTML = register_output;
+  						document.getElementById('register-response').innerHTML = register_output;
             }
   				});
   			}
   		}
+      function move() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/move/`,
+          type: 'POST',
+          data: move_data,
+          success: function(data) {
+            var move_output = player_name + data.move;
+            document.getElementById('move-text').innerHTML = move_output;
+          }
+        });
+      }
+      function game_state() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/game_state`,
+          type: 'POST',
+          data: game_state_data,
+          success: function(data) {
+            document.getElementById('start-response').innerHTML = data;
+          }
+        });
+      }
   		function move() {
         update_data()
   			$.ajax({
@@ -113,17 +147,16 @@
         update_data()
   			$.ajax({
   				url: `http://${ip_address}:${port}/start`,
-  				type: 'POST',
-          data: start_data,
+  				type: 'GET',
   				success: function(data) {
     				var available_characters = data.info;
     				var start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-    				document.getElementById('start-text').innerHTML = start_output;
+    				document.getElementById('start-response').innerHTML = data.message;
           }
   			});
   		}
 
-      let player_name = document.getElementById('register-text').innerHTML;
+      let player_name = document.getElementById('register-response').innerHTML;
       let ip_address = document.getElementById('server-ip').value;
       let port = document.getElementById('server-port').value;
       let move_number = document.getElementById('move-number').value;
@@ -132,6 +165,9 @@
         move: move_number
       };
       let start_data = {
+        player_name: player_name
+      };
+      let game_state_data = {
         player_name: player_name
       };
 
