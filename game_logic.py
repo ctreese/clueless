@@ -27,6 +27,9 @@ class Player:
         self.hand = []
         self.suggested = False
 
+    def get_hand(self):
+        return [card.name for card in self.hand]
+
     def getLegalMoves(self):
         if self.accusation_made is True:
             #player can only move and respond to accusations
@@ -72,8 +75,6 @@ class Room:
             if hall.occupied == 0:
                 exits.append(hall)
         return exits
-
-
 
 class Hallway:
     def __init__(self, adj_room):
@@ -121,6 +122,7 @@ class Deck:
                 i = 0
 
         return case_file
+
 class Board:
     def __init__(self, rooms, hallways, caseFile, players):
         self.rooms = rooms
@@ -382,8 +384,6 @@ def performTurn(board, player, move_number):
             elif response == 2:
                 performAccusation(board, player)
 
-
-
 def findHallway(board, room1, room2):
     found_flag = 0
     i = 0
@@ -392,6 +392,7 @@ def findHallway(board, room1, room2):
             if board.hallways[i].adj_room[1] == room1 or board.hallways[i].adj_room[1] == room2:
                 found_flag = 1
     return board.hallways[i]
+
 def performMove(board, player, location):
     #print(player.name + " " + "has moved from " + player.location.name + " to " + location.name)
     if player.location.type == 0:
@@ -402,7 +403,6 @@ def performMove(board, player, location):
     else:
         player.location.occupied == 1
         print("\n" + player.name + " has moved to the hallway between " + player.location.adj_room[0].name + " and " + player.location.adj_room[1].name)
-
 
 def performSuggestion(board, player):
     #TODO
@@ -457,7 +457,6 @@ def suggestionResponse(board, suspectName, locationName, weaponName):
                 return
     print("No one could disprove the suggestion!")
     return
-
 
 def performAccusation(board, player):
     #TODO
