@@ -15,7 +15,7 @@ class Gamestate(object):
     avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-White", "Colonel-Mustard"]
     playerTurn = ""
     gameStarted = False
-    
+
     cards = []
     rooms = []
     hallways =[]
@@ -23,7 +23,7 @@ class Gamestate(object):
     deck = []
     caseFile = []
     board = []
-    
+
     def get_activePlayers(self):
         return self.playerListActive
 
@@ -43,7 +43,7 @@ class Gamestate(object):
     #placeholder
     def get_gamestate(self):
         return True
-        
+
     def init_gamestate(self):
         self.playerListActive = self.playerList
         self.cards = game_logic.cardInitialization()
@@ -55,7 +55,7 @@ class Gamestate(object):
         self.board = game_logic.Board(self.rooms, self.hallways, self.caseFile)
         self.playerTurn = random.choice(self.playerListActive)
         self.gameStarted = True
-        
+
     def nextTurn(self, player_id):
         idx = self.playerListActive.index(player_id)
         if(len(self.playerListActive)-1 == idx):
@@ -83,7 +83,7 @@ class Gamestate(object):
             return "You have won the game!"
         else:
             return "Sorry, that is incorrect."
-       
+
 #/register
 #GET: Assigns the client a player, and adds that player to the next started game
 #Each client should only call this method ONCE, and should remember its assigned player_id
@@ -150,6 +150,7 @@ class OptionsResource(object):
         self.logger = logging.getLogger('thingsapp.' + __name__)
 
     def on_get(self, req, resp, player_id):
+
         if not self.gs.gameStarted:
             raise falcon.HTTPInternalServerError(
             "Game Not Started",
@@ -162,12 +163,12 @@ class OptionsResource(object):
             )
         options = self.gs.players[player_id].getLegalMoves()
         moveCandidates = []
-        for position in self.gs.players[player_id].location.adj_locs:
-            moveCandidates.append(position.name)
+        for index, position in enumerate(self.gs.players[player_id].location.adj_locs):
+            moveCandidates.append({'destination': position.name, 'id': index})
         cardsList = []
         for card in self.gs.players[player_id].hand:
             cardsList.append(card.name)
-            
+
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'move_options' : options, 'adj' : moveCandidates, 'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
@@ -193,7 +194,7 @@ class LegalityResource(object):
             "Invalid Player Name",
             "That player name is not currently playing"
             )
-        if(move in self.gs.players[player_id].getLegalMoves()): 
+        if(move in self.gs.players[player_id].getLegalMoves()):
             resp.body = '{OK}'
             resp.status = falcon.HTTP_200
         else:
@@ -266,11 +267,11 @@ class MoveResource(object):
         else:
             pass
             #skip turn
-        
-        
+
+
         self.gs.nextTurn(player_id)
         self.gs.players[player_id].suggested = False
-        
+
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps({ 'moveResult' : info });
         resp.status = falcon.HTTP_201
@@ -286,7 +287,7 @@ class initResource(object):
     def __init__(self, db):
         self.gs = gs
         self.logger = logging.getLogger('thingsapp.' + __name__)
-        
+
     def on_get(self, req, resp, player_id):
         resp.set_header('Powered-By', 'Falcon')
         if not self.gs.gameStarted:
@@ -302,7 +303,7 @@ class initResource(object):
             cardsList = []
             for card in self.gs.players[player_id].hand:
                 cardsList.append(card.name)
-                
+
             resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'numPlayers' : numPlayers, 'cardList' : cardsList})
             resp.status = falcon.HTTP_200
 
