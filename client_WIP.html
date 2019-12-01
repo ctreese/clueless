@@ -22,88 +22,11 @@
     </div>
     <div id="main" class="container">
       <table class="table table-striped" id="output-table">
-
-        <tr>
-          <td style="width: 1px;"></td>
-          <td><b>Client Request</b></td>
-          <td><b>Client Input</b></td>
-          <td><b>Server Output</b></td>
-        </tr>
-
-			  <tr>
-  				<td style="width: 1px;"></td>
-  				<td>
-            <button class="btn" id="register-button">Register</button>
-          </td>
-          <td></td>
-          <td>
-            <p><b id="register-response" value=""></b></p>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="width: 1px;"></td>
-          <td>
-            <button class="btn" id="start-button">Start</button>
-          </td>
-          <td></td>
-          <td>
-            <p><b id="start-response"></b></p>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="width: 1px;"></td>
-          <td>
-            <button class="btn" id="init-state-button">Get initial player state</button>
-          </td>
-          <td></td>
-          <td>
-            <p><b id="init-state-response"></b></p>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="width: 1px;"></td>
-          <td>
-            <button class="btn" id="turn-button">Current Turn</button>
-          </td>
-          <td></td>
-          <td>
-            <p><b id="turn-response"></b></p>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="width: 1px;"></td>
-          <td>
-            <button class="btn" id="options-button">Get your options</button>
-          </td>
-          <td></td>
-          <td>
-            <p><b id="options-response"></b></p>
-          </td>
-        </tr>
-
-			  <tr>
-  				<td style="width: 1px;"></td>
-  				<td>
-            <button class="btn" id="move-button">Move</button>
-          </td>
-          <td>
-            <label>Enter your move number here</label>
-            <input type="text" id="move-number" value="1" />
-          </td>
-          <td></td>
-          <td>
-            <p><b id="move-response"></b></p>
-          </td>
-        </tr>
-
-        </table>
+      </table>
     </div>
     <script type="text/javascript">
 
+      // On click functions
       function update_data() {
         player_name = document.getElementById('register-response').value
         ip_address = document.getElementById('server-ip').value
@@ -197,6 +120,94 @@
         });
       }
 
+      // Table row data
+      field_json = [
+        {
+          name:'register',
+          description:'Register as player',
+          function_name: register
+        },
+        {
+          name:'start',
+          description:'Start game',
+          function_name: start
+        },
+        {
+          name:'init-state',
+          description:'Get initial player state',
+          function_name: get_init_state
+        },
+        {
+          name:'turn',
+          description:'Current turn',
+          function_name: turn
+        },
+        {
+          name:'options',
+          description:'Legal options',
+          function_name: options
+        }
+      ];
+
+      // Initialization functions
+      function generate_fields(field_json){
+        let html_fields = field_json.map(function (field) {
+          return `<tr>
+            <td style="width: 1px;"></td>
+            <td>
+              <button class="btn" id="${field.name}-button">${field.description}</button>
+            </td>
+            <td></td>
+            <td>
+              <p><b id="${field.name}-response"></b></p>
+            </td>
+          </tr>`
+        }).reduce(function (accum, field_html) {
+          return accum + field_html
+        });
+
+        let html_fields_inner = `<tr>
+                  <td style="width: 1px;"></td>
+                  <td><b>Client Request</b></td>
+                  <td><b>Client Input</b></td>
+                  <td><b>Server Output</b></td>
+                </tr> ${html_fields} <tr>
+          				<td style="width: 1px;"></td>
+          				<td>
+                    <button class="btn" id="move-button">Move</button>
+                  </td>
+                  <td>
+                    <label>Character</label>
+                    <input type="text" id="move-number" value="" /><br />
+                    <label>Weapon</label>
+                    <input type="text" id="move-number" value="" /><br />
+                    <label>Location</label>
+                    <input type="text" id="move-number" value="" /><br />
+                    <label>Adjacency Index</label>
+                    <input type="text" id="move-number" value="" /><br />
+                  </td>
+                  <td></td>
+                  <td>
+                    <p><b id="move-response"></b></p>
+                  </td>
+                </tr>`;
+          return html_fields_inner;
+      }
+      function bind_fields(field_json){
+        $(document).ready(function() {
+          field_json.forEach(function (field) {
+            $(`#${field.name}-button`).click(field.function_name);
+          })
+          $('#move-button').click(move);
+        })
+      }
+
+
+      // Initialization
+      console.log(field_json)
+      document.getElementById("output-table").innerHTML = generate_fields(field_json);
+      bind_fields(field_json)
+
       let player_name = document.getElementById('register-response').value;
       let ip_address = document.getElementById('server-ip').value;
       let port = document.getElementById('server-port').value;
@@ -211,15 +222,6 @@
       let game_state_data = {
         player_name: player_name
       };
-
-      $(document).ready(function() {
-        $('#register-button').click(register);
-        $('#move-button').click(move);
-        $('#start-button').click(start);
-        $('#init-state-button').click(get_init_state);
-        $('#turn-button').click(turn);
-        $('#options-button').click(options);
-      });
 
     </script>
 </body>
