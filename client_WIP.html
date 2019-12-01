@@ -120,7 +120,7 @@
         });
       }
 
-      // Table row data
+      // Table row initialization functions and data
       field_json = [
         {
           name:'register',
@@ -148,8 +148,6 @@
           function_name: options
         }
       ];
-
-      // Initialization functions
       function generate_fields(field_json){
         let html_fields = field_json.map(function (field) {
           return `<tr>
@@ -177,14 +175,23 @@
                     <button class="btn" id="move-button">Move</button>
                   </td>
                   <td>
+                    <label>Move type</label>
+                    <select id="moveType" onchange="enable_inputs(this)">
+                      <option value="moveToHallway">Move to hallway</option>
+                      <option value="moveToRoom">Move to room</option>
+                      <option value="secretPassage">Use secret passage</option>
+                      <option value="suggest">Suggest</option>
+                      <option value="accuse">Accuse</option>
+                      <option value="skip">Skip</option>
+                    </select>
                     <label>Character</label>
-                    <input type="text" id="move-number" value="" /><br />
+                    <input type="text" id="character" value="" /><br />
                     <label>Weapon</label>
-                    <input type="text" id="move-number" value="" /><br />
+                    <input type="text" id="weapon" value="" /><br />
                     <label>Location</label>
-                    <input type="text" id="move-number" value="" /><br />
+                    <input type="text" id="location" value="" /><br />
                     <label>Adjacency Index</label>
-                    <input type="text" id="move-number" value="" /><br />
+                    <input type="text" id="adj" value="" /><br />
                   </td>
                   <td></td>
                   <td>
@@ -202,6 +209,34 @@
         })
       }
 
+      // Move selection input logic and data
+      enables_enum = ['moveToHallway', 'moveToRoom', 'secretPassage', 'suggest', 'accuse', 'skip'];
+      move_type_enable_json = [
+        {
+          id: 'character',
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+        },
+        {
+          id: 'weapon',
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+        },
+        {
+          id: 'location',
+          enables: ['moveToRoom', 'accuse']
+        },
+        {
+          id: 'adj',
+          enables: ['moveToRoom', 'moveToHallway']
+        }
+      ];
+      function enable_inputs(obj){
+        //enables_enum, move_type_enable_json, select_id
+        move_type_enable_json.forEach(function (input) {
+            input_node = document.getElementById(input.id);
+            input_node.disabled = !input.enables.includes(obj.value);
+            input_node.value = "";
+        })
+      }
 
       // Initialization
       console.log(field_json)
