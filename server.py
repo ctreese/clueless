@@ -137,7 +137,7 @@ class TurnResource(object):
             "That player name is not currently playing"
             )
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'playerturn': self.gs.playerTurn });
+        resp.body = json.dumps({ 'playerTurn': self.gs.playerTurn });
         resp.status = falcon.HTTP_200
 
 #/options/{player_id}
@@ -310,7 +310,7 @@ class initResource(object):
                 'numPlayers' : numPlayers,
                 'cardList' : " ".join(cardsList)
             })
-            
+
             resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp, player_id):

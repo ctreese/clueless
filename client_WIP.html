@@ -66,6 +66,15 @@
           <td><p><b id="init-state-response"></b></p></td>
         </tr>
 
+        <tr>
+          <td style="width: 1px;"></td>
+          <td>
+            <button class="btn" id="turn-button">Current Turn</button>
+          </td>
+          <td></td>
+          <td><p><b id="turn-response"></b></p></td>
+        </tr>
+
 			  <tr>
   				<td style="width: 1px;"></td>
   				<td>
@@ -133,7 +142,6 @@
           url: `http://${ip_address}:${port}/init/${player_name}`,
           type: 'GET',
           success: function(data) {
-            console.log(data)
             let adj_pos_1 = data.adjacentPosition1;
             let adj_pos_2 = data.adjacentPosition2;
             let num_players = data.numPlayers;
@@ -141,6 +149,16 @@
 
             // let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
             document.getElementById('init-state-response').innerHTML = `Players in the game: ${num_players}<br /> Adjacent position 1: ${adj_pos_1}<br /> Adjacent position 2: ${adj_pos_2}<br /> Card List: ${card_list}`;
+          }
+        });
+      }
+      function turn() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/turn/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            document.getElementById('turn-response').innerHTML = `Currently ${data.playerTurn}'s turn`;
           }
         });
       }
@@ -177,6 +195,7 @@
         $('#move-button').click(move);
         $('#start-button').click(start);
         $('#init-state-button').click(get_init_state);
+        $('#turn-button').click(turn);
       });
 
     </script>
