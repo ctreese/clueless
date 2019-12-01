@@ -98,7 +98,7 @@ class RegisterResource(object):
         self.gs.add_player(player)
         resp.set_header('Powered-By', 'Falcon')
         print(player)
-        resp.body = json.dumps({ 'playername': player });
+        resp.body = json.dumps({ 'player_name': player });
         resp.status = falcon.HTTP_200
 
 #/deregister/{player_id}
@@ -317,7 +317,7 @@ class initResource(object):
             )
         character_list = ''
         self.gs.init_gamestate()
-        resp.body = json.dumps({ 'info' : self.gs.playerListActive });
+        resp.body = json.dumps({ 'info' : " ".join(self.gs.playerListActive) });
         resp.status = falcon.HTTP_201
 
 class CORSComponent(object):
