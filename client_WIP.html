@@ -16,7 +16,7 @@
     </div>
     <div class="container">
       <label>Enter your game server IP here:</label>
-      <input type="text" id="server-ip" value="10.0.0.19" />
+      <input type="text" id="server-ip" value="192.168.0.28" />
       <label>Enter your game server port here:</label>
       <input type="text" id="server-port" value="8000" />
     </div>
@@ -44,7 +44,7 @@
           </td>
           <td></td>
           <td>
-            <p><b id="register-response"></b></p>
+            <p><b id="register-response" value=""></b></p>
           </td>
         </tr>
 
@@ -55,6 +55,15 @@
           </td>
           <td></td>
           <td><p><b id="start-response"></b></p></td>
+        </tr>
+
+        <tr>
+          <td style="width: 1px;"></td>
+          <td>
+            <button class="btn" id="init-state-button">Get initial player state</button>
+          </td>
+          <td></td>
+          <td><p><b id="init-state-response"></b></p></td>
         </tr>
 
 			  <tr>
@@ -70,21 +79,12 @@
           <td><p><b id="move-response"></b></p></td>
         </tr>
 
-        <tr>
-          <td style="width: 1px;"></td>
-          <td>
-            <button class="btn" id="game-state-button">Start</button>
-          </td>
-          <td></td>
-          <td><p><b id="game-state-response"></b></p></td>
-        </tr>
-
         </table>
     </div>
     <script type="text/javascript">
 
       function update_data() {
-        player_name = document.getElementById('register-response').innerHTML
+        player_name = document.getElementById('register-response').value
         ip_address = document.getElementById('server-ip').value
         port = document.getElementById('server-port').value
         move_number = document.getElementById('move-number').value
@@ -108,8 +108,9 @@
   					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
   					success: function(data) {
   						player_name = data.player_name;
-  						var register_output = 'Playings as: ' + player_name;
+  						let register_output = 'Playings as: ' + player_name;
   						document.getElementById('register-response').innerHTML = register_output;
+              document.getElementById('register-response').value = player_name;
             }
   				});
   			}
@@ -117,15 +118,32 @@
       function start() {
         update_data()
   			$.ajax({
-  				url: `http://${ip_address}:${port}/start/${player_name}`,
+  				url: `http://${ip_address}:${port}/init/${player_name}`,
   				type: 'POST',
   				success: function(data) {
-    				var available_characters = data.info;
-    				var start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-    				document.getElementById('start-response').innerHTML = "Players in the game: " + data.info;
+    				let available_characters = data.info;
+    				let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+    				document.getElementById('start-response').innerHTML = "Players in the game: " + available_characters;
           }
   			});
   		}
+      function get_init_state() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/init/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            console.log(data)
+            let adj_pos_1 = data.adjacentPosition1;
+            let adj_pos_2 = data.adjacentPosition2;
+            let num_players = data.numPlayers;
+            let card_list = data.cardList
+
+            // let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+            document.getElementById('init-state-response').innerHTML = `Players in the game: ${num_players}<br /> Adjacent position 1: ${adj_pos_1}<br /> Adjacent position 2: ${adj_pos_2}<br /> Card List: ${card_list}`;
+          }
+        });
+      }
       function move() {
         update_data()
         $.ajax({
@@ -138,19 +156,8 @@
           }
         });
       }
-      function game_state() {
-        update_data()
-        $.ajax({
-          url: `http://${ip_address}:${port}/game_state`,
-          type: 'POST',
-          data: game_state_data,
-          success: function(data) {
-            document.getElementById('start-response').innerHTML = data;
-          }
-        });
-      }
 
-      let player_name = document.getElementById('register-response').innerHTML;
+      let player_name = document.getElementById('register-response').value;
       let ip_address = document.getElementById('server-ip').value;
       let port = document.getElementById('server-port').value;
       let move_number = document.getElementById('move-number').value;
@@ -169,6 +176,7 @@
         $('#register-button').click(register);
         $('#move-button').click(move);
         $('#start-button').click(start);
+        $('#init-state-button').click(get_init_state);
       });
 
     </script>

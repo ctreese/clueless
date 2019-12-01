@@ -304,7 +304,13 @@ class initResource(object):
             for card in self.gs.players[player_id].hand:
                 cardsList.append(card.name)
 
-            resp.body = json.dumps({ 'startingPos1' : startingPos1, 'startingPos2' : startingPos2, 'numPlayers' : numPlayers, 'cardList' : cardsList})
+            resp.body = json.dumps({
+                'adjacentPosition1' : startingPos1,
+                'adjacentPosition2' : startingPos2,
+                'numPlayers' : numPlayers,
+                'cardList' : " ".join(cardsList)
+            })
+            
             resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp, player_id):
