@@ -293,6 +293,11 @@ class initResource(object):
         if not self.gs.gameStarted:
             resp.body = json.dumps({ 'gameStarted' : "false" });
             resp.status = falcon.HTTP_200
+        elif(player_id not in self.gs.get_activePlayers()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently playing"
+            )
         else:
             startingPos1 = self.gs.players[player_id].location.adj_locs[0].name
             startingPos2 = self.gs.players[player_id].location.adj_locs[1].name
@@ -320,6 +325,11 @@ class initResource(object):
             raise falcon.HTTPInternalServerError(
             "Insufficent Players Registered",
             "Not enough players are currently registered.  Please register at least 2 players."
+            )
+        elif(player_id not in self.gs.get_playerlist()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently playing"
             )
         character_list = ''
         self.gs.init_gamestate()
