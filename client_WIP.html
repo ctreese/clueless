@@ -27,20 +27,12 @@
     <script type="text/javascript">
 
       // On click functions
+      // Template literals: `string 1 ${variable} string 2`
       function update_data() {
+        // Get input field data from fields used across all onclick functions
         player_name = document.getElementById('register-response').value
         ip_address = document.getElementById('server-ip').value
         port = document.getElementById('server-port').value
-        // move_data = {
-        //   player_name: player_name,
-        //   move: move_number
-        // }
-        // start_data = {
-        //   player_name: player_name
-        // }
-        // game_state_data = {
-        //   player_name: player_name
-        // }
       }
   		function register() {
         update_data()
@@ -48,8 +40,7 @@
   				$.ajax({
   					url: `http://${ip_address}:${port}/register`,
   					type: 'GET',
-  					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
-  					success: function(data) {
+              success: function(data) {
   						player_name = data.player_name;
   						let register_output = 'Playings as: ' + player_name;
   						document.getElementById('register-response').innerHTML = register_output;
@@ -108,10 +99,11 @@
         });
       }
 
+      // Field name e.g. character, weapon, etc. -> utilizing move types e.g. skip, accuse, etc.
       move_type_enable_json = [
         {
-          id: 'character',
-          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+          id: 'character', // ID depends on the ID we have specified in our server that we should look for from POST data.
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse'] // Move types that need to use character data.
         },
         {
           id: 'weapon',
@@ -129,45 +121,32 @@
 
       function move(obj) {
         update_data();
+
+        //Get move type from move type input e.g. accuse, skip, etc.
         let move_type_node = document.getElementById('moveType');
         let move_type = move_type_node.value;
+
+        //Initialize JSON structure to be sent via post request
         let move_data = {
         };
+
+        //Since the move_type_enable_json maps from field -> moves requiring that field, this is our somewhat cryptic logic to find:
+        //Given our move type, what fields do we want to populate our data object with?
         move_type_enable_json.forEach(function (mte_obj) {
           if(mte_obj.enables.includes(move_type)){
+            //we've conveniently named our move_type_enable_json id attributes to be the same as the dict keys that our python server accepts.
             move_data[mte_obj.id] = document.getElementById(mte_obj.id).value
           }
         });
 
         console.log(move_data);
 
-        if (move_type == "moveToRoom") {
-
-        }
-        else if (move_type == "moveToHallway") {
-
-        }
-        else if (move_type == "secretPassage") {
-
-        }
-        else if (move_type == "suggest") {
-
-        }
-        else if (move_type == "accuse") {
-
-        }
-        else if (move_type == "skip") {
-
-        }
-        else {
-
-        }
         $.ajax({
           url: `http://${ip_address}:${port}/move/${player_name}/${move_type}`,
           type: 'POST',
           data: JSON.stringify(move_data),
           headers: {
-            'Content-type':'application/json',
+            'Content-type':'application/json', // These are necessary in making POST requests to falcon
             'Accept':'application/json'
           },
           success: function(data) {
@@ -178,11 +157,14 @@
       }
 
       // Table row initialization functions and data
+
+      // JSON data we will use to dynamically generate our input fields in HTML.
+      // TODO: To improve our clarity, we could make a 2 way hash map and use that.
       field_json = [
         {
-          name:'register',
-          description:'Register as player',
-          function_name: register
+          name:'register', //base string for generating html id to later get with document.getElementById
+          description:'Register as player', //field label/description
+          function_name: register // onclick function used for our field button
         },
         {
           name:'start',
@@ -205,7 +187,8 @@
           function_name: options
         }
       ];
-      function generate_fields(field_json){
+
+      function generate_fields(field_json){ // Function we use to take JSON field specs -> HTML field code
         let html_fields = field_json.map(function (field) {
           return `<tr>
             <td style="width: 1px;"></td>
@@ -221,6 +204,7 @@
           return accum + field_html
         });
 
+        // Add HTML tags and fields that we can't dynamically generate before and after the HTML tags generated above in html_fields
         let html_fields_inner = `<tr>
                   <td style="width: 1px;"></td>
                   <td><b>Client Request</b></td>
@@ -257,7 +241,12 @@
                 </tr>`;
           return html_fields_inner;
       }
+
+
       function bind_fields(field_json){
+        // It's bad practice to specify onclick in HTML, so we use the JQuery method instead.
+        // For each field in field_json, we bind the inputs to those fields to our desired onclick functions.
+        // We also bind the move input since that's not included in our JSON.
         $(document).ready(function() {
           field_json.forEach(function (field) {
             $(`#${field.name}-button`).click(field.function_name);
@@ -269,18 +258,19 @@
       // Move selection input logic and data
 
       function enable_inputs(obj){
-        //enables_enum, move_type_enable_json, select_id
+        // Our onchange function for the move type dropdown
+        // disable and clear unecessary input fields using our move_type_enable_json json data
         move_type_enable_json.forEach(function (input) {
             input_node = document.getElementById(input.id);
-            input_node.disabled = !input.enables.includes(obj.value);
-            input_node.value = "";
+            input_node.disabled = !input.enables.includes(obj.value); //logic to disable fields
+            input_node.value = ""; // clears the field upon move type change
         })
       }
 
       // Initialization
       console.log(field_json)
-      document.getElementById("output-table").innerHTML = generate_fields(field_json);
-      bind_fields(field_json)
+      document.getElementById("output-table").innerHTML = generate_fields(field_json); // generate html code and puts it inside our table
+      bind_fields(field_json) // makes onclick work for fields
 
       let player_name = document.getElementById('register-response').value;
       let ip_address = document.getElementById('server-ip').value;
