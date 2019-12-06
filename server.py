@@ -244,14 +244,18 @@ class MoveResource(object):
         info = ""
         if(move == "moveToHallway"):
             #move to hallway logic
+            oldLoc = self.gs.players[player_id].location.name
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
-            info = player_id + " moved from room to hallway"
+            nextRoom = self.gs.players[player_id].location.adj_locs[0].name
+            if(nextRoom == oldLoc):
+                nextRoom = self.gs.players[player_id].location.adj_locs[1].name
+            info = player_id + " moved from the " + oldLoc + " to the hallway leading to " + nextRoom
         elif(move == "moveToRoom"):
             #move to room
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
-            info = player_id + " moved from hallway to " + self.gs.players[player_id].location.name + ".  "
+            info = " moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
-            info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
+            #info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
             info = player_id + " moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "

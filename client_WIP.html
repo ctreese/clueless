@@ -26,6 +26,14 @@
 		border-style: solid;
 		border-width: 5px;
 		max-width: 50%;
+		width: 50%;
+		position: absolute;
+		left: 500px;
+		top: 190px;
+	}
+	.GUI{
+		position: absolute;
+		right: 100;
 	}
 	
 </style>
@@ -41,30 +49,30 @@
     </div>
     <div class="container">
       <label>Enter your game server IP here:</label>
-      <input type="text" id="server-ip" value="192.168.0.28" />
+      <input type="text" id="server-ip" value="192.168.1.21" />
       <label>Enter your game server port here:</label>
       <input type="text" id="server-port" value="8000" />
     </div>
 	<div class="gameMap">
-		<!-- <div class="mapImage"> <img style="position:absolute" src= "game_map.png" > </div> -->
+		<div class="mapImage"> <img style="position:absolute" src= "game_map.png" > </div>
 		<div class="mapTable"> <table></table> </div>
+		<div class="notes">
+			<label>Enter your game notes here:</label>
+			<input type="text" id="gameNote" value="Type Note" style="width:80%"/>
+			<button type="button" onclick="addNote(gameNote);">Add Note</button>
+			<table id ="notebook" style="width:100%">
+				<tr>
+					<th>NOTEBOOK</th>
+				<tr>
+			
+			</table>
+		</div>
 		
 	</div>
-    <div id="main" class="container">
-      <table class="table table-striped" id="output-table">
-      </table>
+    <div id="main" class="GUI">
+      <table class="table table-striped" id="output-table" > </table>
     </div>
-	<div class="notes">
-		<label>Enter your game notes here:</label>
-		<input type="text" id="gameNote" value="Type Note" />
-		<button type="button" onclick="addNote(gameNote);">Add Note</button>
-		<table id ="notebook" style="width:100%">
-			<tr>
-				<th>NOTEBOOK</th>
-			<tr>
-		
-		</table>
-	</div>
+	
     <script type="text/javascript">
 	
 	function addNote(gameNote){
@@ -74,6 +82,9 @@
 		let text = document.createTextNode(document.getElementById('gameNote').value);
 		th.appendChild(text);
 		row.appendChild(th);
+		if(table.rows.length > 11){
+			table.deleteRow(11);
+		}
 	}
 	
 	function generateTableHead(table, numCells){
@@ -127,7 +138,7 @@
   					//data: 'ID=1&Name=John&Age=10', // or $('#myform').serializeArray()
   					success: function(data) {
   						player_name = data.player_name;
-  						let register_output = 'Playings as: ' + player_name;
+  						let register_output = 'Playing as: ' + player_name;
   						document.getElementById('register-response').innerHTML = register_output;
               document.getElementById('register-response').value = player_name;
             }
@@ -141,8 +152,10 @@
   				type: 'POST',
   				success: function(data) {
     				let available_characters = data.info;
+					let numPLayers = available_characters.length
     				let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-    				document.getElementById('start-response').innerHTML = "Players in the game: " + available_characters;
+    				//document.getElementById('start-response').innerHTML = "There are players in the game: " + numPLayers;
+					document.getElementById('start-response').innerHTML = "There are players in the game: " + available_characters;
           }
   			});
   		}
@@ -178,7 +191,7 @@
           url: `http://${ip_address}:${port}/options/${player_name}`,
           type: 'GET',
           success: function(data) {
-            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
+            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} -> ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
             document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}<br />Cards List: ${data.cardsList}`;
           }
         });
@@ -187,15 +200,17 @@
       move_type_enable_json = [
         {
           id: 'character',
-          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+          //enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+		  enables: ['suggest', 'accuse']
         },
         {
           id: 'weapon',
-          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+          //enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+		  enables: ['suggest', 'accuse']
         },
         {
           id: 'location',
-          enables: ['moveToRoom', 'accuse']
+          enables: ['accuse']
         },
         {
           id: 'adjIndex',

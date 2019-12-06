@@ -56,7 +56,7 @@ class Room:
         
 class Hallway:
     def __init__(self, adj_locs):
-        self.name = adj_locs[0].name + " to " + adj_locs[1].name
+        self.name = "Hallway connecting " + adj_locs[0].name + " to " + adj_locs[1].name
         self.adj_locs = adj_locs
         self.type = 0
 
