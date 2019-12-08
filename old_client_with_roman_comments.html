@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clueless Client Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="#">Clueless Client Demo</a>
+        </div>
+    </div>
+    <div class="container">
+      <label>Enter your game server IP here:</label>
+      <input type="text" id="server-ip" value="192.168.0.28" />
+      <label>Enter your game server port here:</label>
+      <input type="text" id="server-port" value="8000" />
+    </div>
+    <div id="main" class="container">
+      <table class="table table-striped" id="output-table">
+      </table>
+    </div>
+    <script type="text/javascript">
+      // On click functions
+      // Template literals: `string 1 ${variable} string 2`
+      function update_data() {
+        // Get input field data from fields used across all onclick functions
+        player_name = document.getElementById('register-response').value
+        ip_address = document.getElementById('server-ip').value
+        port = document.getElementById('server-port').value
+      }
+  		function register() {
+        update_data()
+  			if(!player_name) {
+  				$.ajax({
+  					url: `http://${ip_address}:${port}/register`,
+  					type: 'GET',
+              success: function(data) {
+  						player_name = data.player_name;
+  						let register_output = 'Playings as: ' + player_name;
+  						document.getElementById('register-response').innerHTML = register_output;
+              document.getElementById('register-response').value = player_name;
+            }
+  				});
+  			}
+  		}
+      function start() {
+        update_data()
+  			$.ajax({
+  				url: `http://${ip_address}:${port}/init/${player_name}`,
+  				type: 'POST',
+  				success: function(data) {
+    				let available_characters = data.info;
+    				let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+    				document.getElementById('start-response').innerHTML = "Players in the game: " + available_characters;
+          }
+  			});
+  		}
+      function get_init_state() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/init/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            let adj_pos_1 = data.adjacentPosition1;
+            let adj_pos_2 = data.adjacentPosition2;
+            let num_players = data.numPlayers;
+            let card_list = data.cardList
+            // let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
+            document.getElementById('init-state-response').innerHTML = `Players in the game: ${num_players}<br /> Adjacent position 1: ${adj_pos_1}<br /> Adjacent position 2: ${adj_pos_2}<br /> Card List: ${card_list}`;
+          }
+        });
+      }
+      function turn() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/turn/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            document.getElementById('turn-response').innerHTML = `Currently ${data.playerTurn}'s turn`;
+          }
+        });
+      }
+      function options() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/options/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
+            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}<br />Cards List: ${data.cardsList}`;
+          }
+        });
+      }
+      // Field name e.g. character, weapon, etc. -> utilizing move types e.g. skip, accuse, etc.
+      move_type_enable_json = [
+        {
+          id: 'character', // ID depends on the ID we have specified in our server that we should look for from POST data.
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse'] // Move types that need to use character data.
+        },
+        {
+          id: 'weapon',
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+        },
+        {
+          id: 'location',
+          enables: ['moveToRoom', 'accuse']
+        },
+        {
+          id: 'adjIndex',
+          enables: ['moveToRoom', 'moveToHallway']
+        }
+      ];
+      function move(obj) {
+        update_data();
+        //Get move type from move type input e.g. accuse, skip, etc.
+        let move_type_node = document.getElementById('moveType');
+        let move_type = move_type_node.value;
+        //Initialize JSON structure to be sent via post request
+        let move_data = {
+        };
+        //Since the move_type_enable_json maps from field -> moves requiring that field, this is our somewhat cryptic logic to find:
+        //Given our move type, what fields do we want to populate our data object with?
+        move_type_enable_json.forEach(function (mte_obj) {
+          if(mte_obj.enables.includes(move_type)){
+            //we've conveniently named our move_type_enable_json id attributes to be the same as the dict keys that our python server accepts.
+            move_data[mte_obj.id] = document.getElementById(mte_obj.id).value
+          }
+        });
+        console.log(move_data);
+        $.ajax({
+          url: `http://${ip_address}:${port}/move/${player_name}/${move_type}`,
+          type: 'POST',
+          data: JSON.stringify(move_data),
+          headers: {
+            'Content-type':'application/json', // These are necessary in making POST requests to falcon
+            'Accept':'application/json'
+          },
+          success: function(data) {
+            var move_output = player_name + data.moveResult;
+            document.getElementById('move-response').innerHTML = move_output;
+          }
+        });
+      }
+      // Table row initialization functions and data
+      // JSON data we will use to dynamically generate our input fields in HTML.
+      // TODO: To improve our clarity, we could make a 2 way hash map and use that.
+      field_json = [
+        {
+          name:'register', //base string for generating html id to later get with document.getElementById
+          description:'Register as player', //field label/description
+          function_name: register // onclick function used for our field button
+        },
+        {
+          name:'start',
+          description:'Start game',
+          function_name: start
+        },
+        {
+          name:'init-state',
+          description:'Get initial player state',
+          function_name: get_init_state
+        },
+        {
+          name:'turn',
+          description:'Current turn',
+          function_name: turn
+        },
+        {
+          name:'options',
+          description:'Legal options',
+          function_name: options
+        }
+      ];
+      function generate_fields(field_json){ // Function we use to take JSON field specs -> HTML field code
+        let html_fields = field_json.map(function (field) {
+          return `<tr>
+            <td style="width: 1px;"></td>
+            <td>
+              <button class="btn" id="${field.name}-button">${field.description}</button>
+            </td>
+            <td></td>
+            <td>
+              <p><b id="${field.name}-response"></b></p>
+            </td>
+          </tr>`
+        }).reduce(function (accum, field_html) {
+          return accum + field_html
+        });
+        // Add HTML tags and fields that we can't dynamically generate before and after the HTML tags generated above in html_fields
+        let html_fields_inner = `<tr>
+                  <td style="width: 1px;"></td>
+                  <td><b>Client Request</b></td>
+                  <td><b>Client Input</b></td>
+                  <td><b>Server Output</b></td>
+                </tr> ${html_fields} <tr>
+          				<td style="width: 1px;"></td>
+          				<td>
+                    <button class="btn" id="move-button">Move</button>
+                  </td>
+                  <td>
+                    <label>Move type</label>
+                    <select id="moveType" onchange="enable_inputs(this)">
+                      <option value="moveToRoom">Move to room</option>
+                      <option value="moveToHallway">Move to hallway</option>
+                      <option value="secretPassage">Use secret passage</option>
+                      <option value="suggest">Suggest</option>
+                      <option value="accuse">Accuse</option>
+                      <option value="skip">Skip</option>
+                    </select>
+                    <label>Character</label>
+                    <input type="text" id="character" value="" /><br />
+                    <label>Weapon</label>
+                    <input type="text" id="weapon" value="" /><br />
+                    <label>Location</label>
+                    <input type="text" id="location" value="" /><br />
+                    <label>Adjacency Index</label>
+                    <input type="text" id="adjIndex" value="" /><br />
+                  </td>
+                  <td></td>
+                  <td>
+                    <p><b id="move-response"></b></p>
+                  </td>
+                </tr>`;
+          return html_fields_inner;
+      }
+      function bind_fields(field_json){
+        // It's bad practice to specify onclick in HTML, so we use the JQuery method instead.
+        // For each field in field_json, we bind the inputs to those fields to our desired onclick functions.
+        // We also bind the move input since that's not included in our JSON.
+        $(document).ready(function() {
+          field_json.forEach(function (field) {
+            $(`#${field.name}-button`).click(field.function_name);
+          })
+          $('#move-button').click(move);
+        })
+      }
+      // Move selection input logic and data
+      function enable_inputs(obj){
+        // Our onchange function for the move type dropdown
+        // disable and clear unecessary input fields using our move_type_enable_json json data
+        move_type_enable_json.forEach(function (input) {
+            input_node = document.getElementById(input.id);
+            input_node.disabled = !input.enables.includes(obj.value); //logic to disable fields
+            input_node.value = ""; // clears the field upon move type change
+        })
+      }
+      // Initialization
+      console.log(field_json)
+      document.getElementById("output-table").innerHTML = generate_fields(field_json); // generate html code and puts it inside our table
+      bind_fields(field_json) // makes onclick work for fields
+      let player_name = document.getElementById('register-response').value;
+      let ip_address = document.getElementById('server-ip').value;
+      let port = document.getElementById('server-port').value;
+    </script>
+</body>
+</html>
