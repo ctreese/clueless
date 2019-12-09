@@ -16,7 +16,7 @@
     </div>
     <div class="container">
       <label>Enter your game server IP here:</label>
-      <input type="text" id="server-ip" value="192.168.0.28" />
+      <input type="text" id="server-ip" value="10.0.0.19" />
       <label>Enter your game server port here:</label>
       <input type="text" id="server-port" value="8000" />
     </div>
@@ -94,7 +94,17 @@
           type: 'GET',
           success: function(data) {
             let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
-            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}<br />Cards List: ${data.cardsList}`;
+            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}`;
+          }
+        });
+      }
+      function cards() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/cards/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            document.getElementById('cards-response').innerHTML = `Cards List: ${data.cardsList}`;
           }
         });
       }
@@ -185,6 +195,11 @@
           name:'options',
           description:'Legal options',
           function_name: options
+        },
+        {
+          name:'cards',
+          description:'Cards in hand',
+          function_name: cards
         }
       ];
 
