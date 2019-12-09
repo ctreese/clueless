@@ -68,13 +68,18 @@ class Gamestate(object):
             self.nextTurn(self.playerTurn)
 
     def makeSuggestion(self, character, suspect, weapon, location):
+        addInfo = ""
+        print(suspect, flush = True)
+        print(self.playerListActive, flush = True)
         if suspect in self.playerListActive:
+            print(suspect, flush = True)
             for player in self.players.values():
                 print(player, flush = True)
                 if player.name == suspect:
+                    addInfo = " " + suspect + " moved to " + location.name
                     player.location = location
                     player.suggested = True
-        return game_logic.performSuggestion(suspect, weapon, location.name, self.players);
+        return game_logic.performSuggestion(suspect, weapon, location.name, self.players) + addInfo;
 
     def makeAccusation(self, player_id, character, weapon, location):
         gameWon = game_logic.performAccusation(self.board, self.players[player_id], character, weapon, location);
@@ -255,7 +260,7 @@ class MoveResource(object):
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
             info = " moved from hallway to " + self.gs.players[player_id].location.name + ".  "
             #suggestion logic
-            #info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
+            info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
             info = player_id + " moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "

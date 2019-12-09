@@ -256,7 +256,7 @@ def suggestionResponse(suspectName, locationName, weaponName, playerList):
     for player in playerList.values():
         for card in player.hand:
             if card.name == suspectName or card.name == locationName or card.name == weaponName:
-                return player.name + " has disproved the suggestion!"
+                return player.name + " has disproved the suggestion, by showing the card " + card.name;
     return "No one could disprove the suggestion!"
     
     
