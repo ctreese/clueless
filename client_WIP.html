@@ -115,6 +115,7 @@
           url: `http://${ip_address}:${port}/positions`,
           type: 'GET',
           success: function(data) {
+            // operate with the unstringified data variable when working with map display
             document.getElementById('positions-response').innerHTML = JSON.stringify(data);
           }
         });
