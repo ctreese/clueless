@@ -176,6 +176,11 @@ def roomInitialization():
     room.append(Room("Library",0))
     room.append(Room("Billard Room",0))
     
+    room[0].corner_room = room[4]
+    room[2].corner_room = room[6]
+    room[4].corner_room = room[0]
+    room[6].corner_room = room[2]
+    
 #    room[0]= Room("Study",1)
 #    room[1] = Room("Hall",0)
 #    room[2] = Room("Lounge",1)
