@@ -75,15 +75,15 @@ class Gamestate(object):
                     addInfo = " " + suspect + " moved to " + location.name
                     player.location = location
                     player.suggested = True
-        return game_logic.performSuggestion(suspect, weapon, location.name, self.players) + addInfo;
+        return ": " + game_logic.performSuggestion(suspect, weapon, location.name, self.players) + addInfo;
 
     def makeAccusation(self, player_id, character, weapon, location):
         gameWon = game_logic.performAccusation(self.board, self.players[player_id], character, weapon, location);
         if(gameWon):
             self.gameStarted = False
-            return "You have won the game!"
+            return ", you have won the game!"
         else:
-            return "Sorry, that is incorrect."
+            return ", sorry, that is incorrect."
 
 #/register
 #GET: Assigns the client a player, and adds that player to the next started game
@@ -250,7 +250,7 @@ class MoveResource(object):
             nextRoom = self.gs.players[player_id].location.adj_locs[0].name
             if(nextRoom == oldLoc):
                 nextRoom = self.gs.players[player_id].location.adj_locs[1].name
-            info = player_id + " moved from the " + oldLoc + " to the hallway leading to " + nextRoom
+            info = " moved from the " + oldLoc + " to the hallway leading to " + nextRoom
         elif(move == "moveToRoom"):
             #move to room
             self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
@@ -259,7 +259,7 @@ class MoveResource(object):
             info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "secretPassage"):
             self.gs.players[player_id].location = self.gs.players[player_id].location.corner_room
-            info = player_id + " moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
+            info = " moved from has taken the secret passage to " + self.gs.players[player_id].location.name + ".  "
             info += self.gs.makeSuggestion(player_id, req.media.get('character'), req.media.get('weapon'), self.gs.players[player_id].location)
         elif(move == "suggest"):
             #suggestion logic

@@ -290,7 +290,7 @@
           },
           success: function(data) {
             var move_output = data.moveResult;
-            document.getElementById('move-response').innerHTML = move_output;
+            document.getElementById('move-response').innerHTML = player_name + move_output;
 			//display location on map
 			
           }
@@ -367,11 +367,34 @@
                       <option value="skip">Skip</option>
                     </select>
                     <label>Character</label>
-                    <input type="text" id="character" value="" /><br />
+                    <select name="characters" id="character">
+						<option value="Mr-Green">Rev. Green</option>
+						<option value="Colonel-Mustard">Colonel Mustard</option>
+						<option value="Mrs-Peacock">Mrs. Peacock</option>
+						<option value="Professor-Plum">Professor Plum</option>
+						<option value="Miss-Scarlet">Miss Scarlett</option>
+						<option value="Mrs-White">Mrs. White</option>
+					</select><br />
                     <label>Weapon</label>
-                    <input type="text" id="weapon" value="" /><br />
+					<select name="weapons" id="weapon">
+						<option value="Candlestick">Candlestick</option>
+						<option value="Dagger">Dagger</option>
+						<option value="Lead Pipe">Lead Pipe</option>
+						<option value="Revolver">Revolver</option>
+						<option value="Rope">Rope</option>
+						<option value="Wrench">Wrench</option>
+					</select><br />
                     <label>Location</label>
-                    <input type="text" id="location" value="" /><br />
+					<select name="locations" id="location">
+						<option value="Ballroom">Ballroom</option>
+						<option value="Billard Room">Billard Room</option>
+						<option value="Dining Room">Dining Room</option>
+						<option value="Hall">Hall</option>
+						<option value="Kitchen">Kitchen</option>
+						<option value="Library">Library</option>
+						<option value="Lounge">Lounge</option>
+						<option value="Study">Study</option>
+					</select><br />
                     <label>Adjacency Index</label>
                     <input type="text" id="adjIndex" value="" /><br />
                   </td>
