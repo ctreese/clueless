@@ -69,12 +69,8 @@ class Gamestate(object):
 
     def makeSuggestion(self, character, suspect, weapon, location):
         addInfo = ""
-        print(suspect, flush = True)
-        print(self.playerListActive, flush = True)
         if suspect in self.playerListActive:
-            print(suspect, flush = True)
             for player in self.players.values():
-                print(player, flush = True)
                 if player.name == suspect:
                     addInfo = " " + suspect + " moved to " + location.name
                     player.location = location

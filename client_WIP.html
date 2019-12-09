@@ -239,14 +239,14 @@
         {
           //shambly-client-update
           id: 'character', // ID depends on the ID we have specified in our server that we should look for from POST data.
-          //enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
-		  enables: ['moveToRoom', 'suggest', 'accuse'] // Move types that need to use character data.
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+		  //enables: ['moveToRoom', 'suggest', 'accuse'] // Move types that need to use character data.
 
         },
         {
           id: 'weapon',
-          //enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
-		  enables: ['moveToRoom', 'suggest', 'accuse']
+          enables: ['moveToRoom', 'secretPassage', 'suggest', 'accuse']
+		  //enables: ['suggest', 'accuse']
         },
         {
           id: 'location',
@@ -289,7 +289,7 @@
             'Accept':'application/json'
           },
           success: function(data) {
-            var move_output = player_name + data.moveResult;
+            var move_output = data.moveResult;
             document.getElementById('move-response').innerHTML = move_output;
 			//display location on map
 			
