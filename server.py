@@ -118,7 +118,7 @@ class DeregisterResource(object):
 
 #/turn/{player_id}
 #GET: Returns what players turn it currently is
-#This should be called periodically by the client, so that it knows when it is ready to receive plyer input
+#This should be called periodically by the client, so that it knows when it is ready to receive player input
 class TurnResource(object):
 
     def __init__(self, db):
@@ -171,8 +171,8 @@ class OptionsResource(object):
         resp.status = falcon.HTTP_200
 
 #/cards/{player_id}
-#GET: returns legal moves, adjacent rooms, and the list of seen cards
-#This should be called by the client after a call to the turn method indicates it is the players turn
+#GET: returns cards in hand for requesting player
+#This should be called periodically by the client to update user on his or her hand
 class CardsResource(object):
 
     def __init__(self, db):
@@ -200,6 +200,9 @@ class CardsResource(object):
         resp.body = json.dumps({'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
 
+#/positions
+#GET: returns position data objects for all player's positions
+#This should be called periodically by the client, so that the map may update
 class PositionsResource(object):
 
     def __init__(self, db):
