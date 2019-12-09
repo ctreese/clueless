@@ -109,6 +109,17 @@
         });
       }
 
+      function positions() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/positions`,
+          type: 'GET',
+          success: function(data) {
+            document.getElementById('positions-response').innerHTML = JSON.stringify(data);
+          }
+        });
+      }
+
       // Field name e.g. character, weapon, etc. -> utilizing move types e.g. skip, accuse, etc.
       move_type_enable_json = [
         {
@@ -200,6 +211,11 @@
           name:'cards',
           description:'Cards in hand',
           function_name: cards
+        },
+        {
+          name:'positions',
+          description:'Positions of other players',
+          function_name: positions
         }
       ];
 

@@ -200,6 +200,25 @@ class CardsResource(object):
         resp.body = json.dumps({'cardsList' : cardsList });
         resp.status = falcon.HTTP_200
 
+class PositionsResource(object):
+
+    def __init__(self, db):
+        self.gs = gs
+        self.logger = logging.getLogger('thingsapp.' + __name__)
+
+    def on_get(self, req, resp):
+
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
+
+        character_to_pos_dict = {player_name: {'type': player_obj.location.type, 'name': player_obj.location.name, 'adj_locs': [loc.name for loc in player_obj.location.adj_locs]} for (player_name, player_obj) in self.gs.players.items()}
+        resp.set_header('Powered-By', 'Falcon')
+        resp.body = json.dumps(character_to_pos_dict);
+        resp.status = falcon.HTTP_200
+
 #/legality/{player_id}/{move}
 #GET: returns the validity of the given move for the given player
 #this is somewhat redundant with the options method currently
@@ -400,6 +419,7 @@ turn = TurnResource(gs)
 gameOptions = OptionsResource(gs)
 legality = LegalityResource(gs)
 cards = CardsResource(gs)
+positions = PositionsResource(gs)
 move = MoveResource(gs)
 gameInit = initResource(gs)
 
@@ -409,6 +429,7 @@ app.add_route('/turn/{player_id}', turn)
 app.add_route('/options/{player_id}', gameOptions)
 app.add_route('/cards/{player_id}', cards)
 app.add_route('/legality/{player_id}/{move}', legality)
+app.add_route('/positions', positions)
 app.add_route('/move/{player_id}/{move}', move)
 app.add_route('/init/{player_id}', gameInit)
 
