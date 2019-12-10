@@ -176,7 +176,11 @@
 	  						document.getElementById('register-response').innerHTML = player_name;
 	              document.getElementById('playing-as').innerHTML = player_name;
 								append_console(document.getElementById('console-box'), player_name);
-            	}
+            	},
+			  error: function(xhr, status, error) {
+				  var err = JSON.parse(xhr.responseText);
+				  alert(err.description);
+				}
   				});
   			}
   		}
@@ -193,7 +197,11 @@
 						append_console(document.getElementById('console-box'), output_string);
 						document.getElementById('start-response').innerHTML = output_string;
 
-          }
+          },
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
   			});
   		}
       function get_init_state() {
@@ -224,7 +232,11 @@
 						append_console(document.getElementById('console-box'), output_string);
             document.getElementById('turn-response').innerHTML = output_string;
 						document.getElementById('current-player-turn').innerHTML = output_string;
-          }
+          },
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
         });
       }
       function options() {
@@ -238,7 +250,11 @@
 						append_console(document.getElementById('console-box'), output_string);
 						document.getElementById('options-response').innerHTML = output_string;
 						document.getElementById('legal-moves').innerHTML = output_string;
-          }
+          },
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
         });
       }
       function cards() {
@@ -252,7 +268,11 @@
             document.getElementById('character-cards').innerHTML = data.characters.join("<br />");
 						document.getElementById('room-cards').innerHTML = data.rooms.join("<br />");
 						document.getElementById('weapon-cards').innerHTML = data.weapons.join("<br />");
-					}
+					},
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
         });
       }
 
@@ -272,7 +292,11 @@
 						for (const [name, value] of Object.entries(data)) {
 							document.getElementById(value.id_name).innerHTML += name + "<br>";
 						}
-          }
+          },
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
         });
       }
 
@@ -336,7 +360,11 @@
 						append_console(document.getElementById('console-box'), output_string);
             document.getElementById('move-response').innerHTML = output_string;
 
-          }
+			},
+		  error: function(xhr, status, error) {
+			  var err = JSON.parse(xhr.responseText);
+			  alert(err.description);
+			}
         });
       }
 
