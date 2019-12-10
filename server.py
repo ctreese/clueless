@@ -65,7 +65,19 @@ class Gamestate(object):
             self.playerTurn = self.playerListActive[idx+1]
         #check to see if accusation has been made, if so skip turn
         if(self.players[self.playerTurn].accusation_made):
-            self.nextTurn(self.playerTurn)
+            if(any(not player.accusation_made for player in self.players.values())):
+                self.nextTurn(self.playerTurn)
+            else:
+                #all players have made an incorrect accusation:
+                print("")
+                print("*****************************************")
+                print("All players were incorrect!")
+                print("*****************************************")
+                print("")
+                print("The suspect was: " + self.board.caseFile.suspect.name)
+                print("The room was: " + self.board.caseFile.room.name)
+                print("The weapon was: " + self.board.caseFile.weapon.name, flush=True)
+                self.gameStarted = False                    
 
     def makeSuggestion(self, character, suspect, weapon, location):
         addInfo = ""
