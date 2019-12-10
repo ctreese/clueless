@@ -35,7 +35,7 @@
 		position: absolute;
 		right: 100;
 	}
-	
+
 </style>
 
 
@@ -47,9 +47,9 @@
             <a class="brand" href="#">Clueless Client Demo</a>
         </div>
     </div>
-    <div class="container" >
+    <div class="container">
       <label>Enter your game server IP here:</label>
-      <input type="text" id="server-ip" value="192.168.1.249" />
+      <input type="text" id="server-ip" value="10.0.0.19" />
       <label>Enter your game server port here:</label>
       <input type="text" id="server-port" value="8000" />
 	  <table id="playerInfo" style="position: absolute; left: 450px; top: 50px">
@@ -59,7 +59,7 @@
 			<tr>
 				<th></th>
 			<tr>
-				
+
 	  </table>
 	  <table id="cardsCharacters" style="position: absolute; left: 600px; top: 50px">
 			<tr>
@@ -68,7 +68,7 @@
 			<tr>
 				<th></th>
 			<tr>
-				
+
 	  </table>
 	  <table id="cardsLocations" style="position: absolute; left: 750px; top: 50px">
 			<tr>
@@ -77,7 +77,7 @@
 			<tr>
 				<th></th>
 			<tr>
-				
+
 	  </table>
 	  <table id="cardsWeapons" style="position: absolute; left: 900px; top: 50px">
 			<tr>
@@ -86,7 +86,7 @@
 			<tr>
 				<th></th>
 			<tr>
-				
+
 	  </table>
     </div>
 	<div class="gameMap">
@@ -100,17 +100,16 @@
 				<tr>
 					<th>NOTEBOOK</th>
 				<tr>
-			
+
 			</table>
 		</div>
-		
+
 	</div>
     <div id="main" class="GUI">
       <table class="table table-striped" id="output-table" style="width: 50%"> </table>
     </div>
-	
     <script type="text/javascript">
-	
+
 	function addNote(gameNote){
 		let table = document.getElementById("notebook");
 		let row = table.insertRow(2);
@@ -122,7 +121,7 @@
 			table.deleteRow(11);
 		}
 	}
-	
+
 	function generateTableHead(table, numCells){
 		let thead = table.createTHead();
 		let row = thead.insertRow();
@@ -147,9 +146,9 @@
 	let numCells = 121;
 	generateTable(table, numCells);
 	generateTableHead(table,numCells);
-	
-	
-			
+
+
+
       // On click functions
       // Template literals: `string 1 ${variable} string 2`
       function update_data() {
@@ -166,7 +165,7 @@
   					type: 'GET',
               success: function(data) {
   						player_name = data.player_name;
-  						let register_output = 'Playing as: ' + player_name;
+  						let register_output = 'Playings as: ' + player_name;
   						document.getElementById('register-response').innerHTML = register_output;
               document.getElementById('register-response').value = player_name;
 			let table = document.getElementById("playerInfo");
@@ -179,8 +178,6 @@
             }
   				});
   			}
-
-			
   		}
       function start() {
         update_data()
@@ -228,8 +225,30 @@
           url: `http://${ip_address}:${port}/options/${player_name}`,
           type: 'GET',
           success: function(data) {
-            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} -> ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
-            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}<br />Cards List: ${data.cardsList}`;
+            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
+            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}`;
+          }
+        });
+      }
+      function cards() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/cards/${player_name}`,
+          type: 'GET',
+          success: function(data) {
+            document.getElementById('cards-response').innerHTML = `Cards List: ${data.cardsList}`;
+          }
+        });
+      }
+
+      function positions() {
+        update_data()
+        $.ajax({
+          url: `http://${ip_address}:${port}/positions`,
+          type: 'GET',
+          success: function(data) {
+            // operate with the unstringified data variable when working with map display
+            document.getElementById('positions-response').innerHTML = JSON.stringify(data);
           }
         });
       }
@@ -292,7 +311,7 @@
             var move_output = data.moveResult;
             document.getElementById('move-response').innerHTML = player_name + move_output;
 			//display location on map
-			
+
           }
         });
       }
@@ -326,6 +345,16 @@
           name:'options',
           description:'Legal options',
           function_name: options
+        },
+        {
+          name:'cards',
+          description:'Cards in hand',
+          function_name: cards
+        },
+        {
+          name:'positions',
+          description:'Positions of other players',
+          function_name: positions
         }
       ];
 
@@ -398,7 +427,7 @@
                     <label>Adjacency Index</label>
                     <input type="text" id="adjIndex" value="" /><br />
                   </td>
-                  
+                  <td></td>
                   <td>
                     <p><b id="move-response"></b></p>
                   </td>

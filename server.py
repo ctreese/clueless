@@ -119,7 +119,7 @@ class DeregisterResource(object):
 
 #/turn/{player_id}
 #GET: Returns what players turn it currently is
-#This should be called periodically by the client, so that it knows when it is ready to receive plyer input
+#This should be called periodically by the client, so that it knows when it is ready to receive player input
 class TurnResource(object):
 
     def __init__(self, db):
@@ -166,12 +166,61 @@ class OptionsResource(object):
         moveCandidates = []
         for index, position in enumerate(self.gs.players[player_id].location.adj_locs):
             moveCandidates.append({'destination': position.name, 'id': index})
+
+        resp.set_header('Powered-By', 'Falcon')
+        resp.body = json.dumps({ 'move_options' : options, 'adj' : moveCandidates});
+        resp.status = falcon.HTTP_200
+
+#/cards/{player_id}
+#GET: returns cards in hand for requesting player
+#This should be called periodically by the client to update user on his or her hand
+class CardsResource(object):
+
+    def __init__(self, db):
+        self.gs = gs
+        self.logger = logging.getLogger('thingsapp.' + __name__)
+
+    def on_get(self, req, resp, player_id):
+
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
+        if(player_id not in self.gs.get_activePlayers()):
+            raise falcon.HTTPBadRequest(
+            "Invalid Player Name",
+            "That player name is not currently playing"
+            )
+
         cardsList = []
         for card in self.gs.players[player_id].hand:
             cardsList.append(card.name)
 
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({ 'move_options' : options, 'adj' : moveCandidates, 'cardsList' : cardsList });
+        resp.body = json.dumps({'cardsList' : cardsList });
+        resp.status = falcon.HTTP_200
+
+#/positions
+#GET: returns position data objects for all player's positions
+#This should be called periodically by the client, so that the map may update
+class PositionsResource(object):
+
+    def __init__(self, db):
+        self.gs = gs
+        self.logger = logging.getLogger('thingsapp.' + __name__)
+
+    def on_get(self, req, resp):
+
+        if not self.gs.gameStarted:
+            raise falcon.HTTPInternalServerError(
+            "Game Not Started",
+            "Please start the game before issuing commands"
+            )
+
+        character_to_pos_dict = {player_name: {'type': player_obj.location.type, 'name': player_obj.location.name, 'adj_locs': [loc.name for loc in player_obj.location.adj_locs]} for (player_name, player_obj) in self.gs.players.items()}
+        resp.set_header('Powered-By', 'Falcon')
+        resp.body = json.dumps(character_to_pos_dict);
         resp.status = falcon.HTTP_200
 
 #/legality/{player_id}/{move}
@@ -377,6 +426,8 @@ deregister = DeregisterResource(gs)
 turn = TurnResource(gs)
 gameOptions = OptionsResource(gs)
 legality = LegalityResource(gs)
+cards = CardsResource(gs)
+positions = PositionsResource(gs)
 move = MoveResource(gs)
 gameInit = initResource(gs)
 
@@ -384,7 +435,9 @@ app.add_route('/register', register)
 app.add_route('/deregister/{player_id}', deregister)
 app.add_route('/turn/{player_id}', turn)
 app.add_route('/options/{player_id}', gameOptions)
+app.add_route('/cards/{player_id}', cards)
 app.add_route('/legality/{player_id}/{move}', legality)
+app.add_route('/positions', positions)
 app.add_route('/move/{player_id}/{move}', move)
 app.add_route('/init/{player_id}', gameInit)
 
