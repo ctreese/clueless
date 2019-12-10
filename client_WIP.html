@@ -270,7 +270,7 @@
             document.getElementById('positions-response').innerHTML = output_string;
 						clear_gui_board(occupation_class_name);
 						for (const [name, value] of Object.entries(data)) {
-							document.getElementById(value.id_name).innerHTML = name;
+							document.getElementById(value.id_name).innerHTML += name + "<br>";
 						}
           }
         });
@@ -417,12 +417,12 @@
                     </select>
                     <label>Character</label>
                     <select name="characters" id="character">
-											<option value="Mr-Green">Rev. Green</option>
-											<option value="Colonel-Mustard">Colonel Mustard</option>
-											<option value="Mrs-Peacock">Mrs. Peacock</option>
-											<option value="Professor-Plum">Professor Plum</option>
-											<option value="Miss-Scarlet">Miss Scarlett</option>
-											<option value="Mrs-White">Mrs. White</option>
+											<option value="Rev. Green">Rev. Green</option>
+											<option value="Colonel Mustard">Colonel Mustard</option>
+											<option value="Mrs. Peacock">Mrs. Peacock</option>
+											<option value="Professor Plum">Professor Plum</option>
+											<option value="Miss Scarlet">Miss Scarlett</option>
+											<option value="Mrs. White">Mrs. White</option>
 										</select><br />
                     <label>Weapon</label>
 										<select name="weapons" id="weapon">
@@ -541,6 +541,8 @@
       let player_name = document.getElementById('register-response').innerHTML;
       let ip_address = document.getElementById('server-ip').value;
       let port = document.getElementById('server-port').value;
+	  //disable location on load
+	  document.getElementById("location").disabled = true;
 
     </script>
 </body>
