@@ -526,6 +526,7 @@
 							var cell_occupation_div = document.createElement("div");
 							cell_occupation_div.setAttribute("id", board_array[row][col]);
 							cell_occupation_div.setAttribute("class", "board-occupation");
+							cell.appendChild(cell_occupation_div)
 						}
 						else if (typeof board_array[row][col] === "boolean" && !board_array[row][col]) {
 
@@ -533,7 +534,7 @@
 						else {
 							throw "Board JSON bad type";
 						}
-						cell.appendChild(cell_occupation_div)
+
 						tr.appendChild(cell);
 
 					}
