@@ -193,12 +193,25 @@ class CardsResource(object):
             "That player name is not currently playing"
             )
 
-        cardsList = []
+        output = {
+            'characters': [],
+            'weapons': [],
+            'rooms': []
+        }
         for card in self.gs.players[player_id].hand:
-            cardsList.append(card.name)
+            if card.type is 1:
+                output['characters'].append(card.name)
+            elif card.type is 2:
+                output['weapons'].append(card.name)
+            elif card.type is 3:
+                output['rooms'].append(card.name)
+            else:
+                raise falcon.HTTPBadRequest(
+                "Invalid Card Used",
+                )
 
         resp.set_header('Powered-By', 'Falcon')
-        resp.body = json.dumps({'cardsList' : cardsList });
+        resp.body = json.dumps(output);
         resp.status = falcon.HTTP_200
 
 #/positions
@@ -218,7 +231,7 @@ class PositionsResource(object):
             "Please start the game before issuing commands"
             )
 
-        character_to_pos_dict = {player_name: {'type': player_obj.location.type, 'name': player_obj.location.name, 'adj_locs': [loc.name for loc in player_obj.location.adj_locs]} for (player_name, player_obj) in self.gs.players.items()}
+        character_to_pos_dict = {player_name: {'type': player_obj.location.type, 'name': player_obj.location.name, 'id_name': player_obj.location.id_name, 'adj_locs': [loc.name for loc in player_obj.location.adj_locs]} for (player_name, player_obj) in self.gs.players.items()}
         resp.set_header('Powered-By', 'Falcon')
         resp.body = json.dumps(character_to_pos_dict);
         resp.status = falcon.HTTP_200

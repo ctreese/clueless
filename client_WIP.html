@@ -8,21 +8,17 @@
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <style>
-	table, th, td {
+	/* .gameMap ~ table, th, td {
 	padding: 10px;
 	border: 1px solid black;
 	border-collapse: collapse;
 	}
-	<!-- .gameMap{ -->
-		<!-- <!-- position: aboslute; --> -->
-		<!-- height: 75px; -->
-		<!-- width: 75px; -->
-	<!-- } -->
-	img {
+
+	.gameMap ~ img {
 		max-width: 64%;
 		max-height: 64%;
 	}
-	.notes{
+	.gameMap ~ .notes{
 		border-style: solid;
 		border-width: 5px;
 		max-width: 50%;
@@ -30,10 +26,12 @@
 		position: absolute;
 		left: 500px;
 		top: 190px;
+	} */
+	.server-response {
+		display: none;
 	}
-	.GUI{
-		position: absolute;
-		right: 100;
+	#board > tr {
+		height:100px;
 	}
 
 </style>
@@ -44,119 +42,129 @@
 <body>
     <div class="navbar">
         <div class="navbar-inner">
+					<form class="navbar-form">
             <a class="brand" href="#">Clueless Client Demo</a>
+						<!-- <label>Enter your game server IP here:</label> -->
+						<div style="display: inline; margin:30px">
+							Server IP Address
+							<input type="text" class="form-control mr-sm-2" id="server-ip" value="10.0.0.19" />
+						</div>
+
+						<div style="display: inline; margin:30px">
+							Address Port
+							<input type="text" class="form-control mr-sm-2" id="server-port" value="8000"/>
+						</div>
+					</form>
         </div>
     </div>
     <div class="container">
-      <label>Enter your game server IP here:</label>
-      <input type="text" id="server-ip" value="10.0.0.19" />
-      <label>Enter your game server port here:</label>
-      <input type="text" id="server-port" value="8000" />
-	  <table id="playerInfo" style="position: absolute; left: 450px; top: 50px">
-			<tr>
-				<th> Playing As: </th>
-			</tr>
-			<tr>
-				<th></th>
-			<tr>
-
-	  </table>
-	  <table id="cardsCharacters" style="position: absolute; left: 600px; top: 50px">
-			<tr>
-				<th> Character Cards </th>
-			</tr>
-			<tr>
-				<th></th>
-			<tr>
-
-	  </table>
-	  <table id="cardsLocations" style="position: absolute; left: 750px; top: 50px">
-			<tr>
-				<th> Location Cards </th>
-			</tr>
-			<tr>
-				<th></th>
-			<tr>
-
-	  </table>
-	  <table id="cardsWeapons" style="position: absolute; left: 900px; top: 50px">
-			<tr>
-				<th> Weapon Cards </th>
-			</tr>
-			<tr>
-				<th></th>
-			<tr>
-
-	  </table>
-    </div>
-	<div class="gameMap">
-		<div class="mapImage"> <img style="position:absolute" src= "game_map.png" > </div>
-		<div class="mapTable"> <table id="gamemaptable"></table> </div>
-		<div class="notes">
-			<label>Enter your game notes here:</label>
-			<input type="text" id="gameNote" value="Type Note" style="width:80%"/>
-			<button type="button" onclick="addNote(gameNote);">Add Note</button>
-			<table id ="notebook" style="width:100%">
+		  <table id="playerInfo" class="table table-striped">
 				<tr>
-					<th>NOTEBOOK</th>
+					<th> Playing As </th>
+					<th> Character Cards </th>
+					<th> Location Cards </th>
+					<th> Weapon Cards </th>
+					<th> Initial State </th>
+				</tr>
 				<tr>
-
+					<td id="playing-as"> </td>
+					<td id="room-cards"> </td>
+					<td id="character-cards"> </td>
+					<td id="weapon-cards"> </td>
+					<td id="init-state"> </td>
+				</tr>
+		  </table>
+			<table id="turn-info" class="table table-striped">
+				<tr>
+					<th> Current Player's Turn</th>
+					<th> Current Legal Moves</th>
+				</tr>
+				<tr>
+					<td id="current-player-turn"> </td>
+					<td id="legal-moves"> </td>
+				</tr>
 			</table>
-		</div>
-
-	</div>
-    <div id="main" class="GUI">
-      <table class="table table-striped" id="output-table" style="width: 50%"> </table>
+			<div>
+				<div class="notes">
+					<label>Enter your game notes here:</label>
+					<input type="text" id="gameNote" value="Type Note"/>
+					<button type="button" class="btn" onclick="addNote(gameNote);">Add Note</button>
+					<table id ="notebook" class="table table-striped">
+						<tr>
+							<th>NOTEBOOK</th>
+						<tr>
+					</table>
+				</div>
+			</div>
+			<div style="width: 100%; overflow: auto">
+				<div style="display:inline; float:left;width:75%">
+					<table class="table table-bordered" id="board"></table>
+				</div>
+				<div style="display:inline; float:right">
+					<table class="table table-striped" id="output-table" style="display:inline"> </table>
+				</div>
+			</div>
+			<div>
+				<div><b>Console Output</b></div>
+				<textarea class="form-control" rows="5" id="console-box" style="width: calc(100% - 30px); margin-top: 20px" readonly></textarea>
+			</div>
     </div>
+
+
     <script type="text/javascript">
 
-	function addNote(gameNote){
-		let table = document.getElementById("notebook");
-		let row = table.insertRow(2);
-		let th = document.createElement("th");
-		let text = document.createTextNode(document.getElementById('gameNote').value);
-		th.appendChild(text);
-		row.appendChild(th);
-		if(table.rows.length > 11){
-			table.deleteRow(11);
-		}
-	}
-
-	function generateTableHead(table, numCells){
-		let thead = table.createTHead();
-		let row = thead.insertRow();
-		for(let x = 0; x < Math.sqrt(numCells); x++){
-			let th = document.createElement("th");
-			let text = document.createTextNode("top");
-			th.appendChild(text);
-			row.appendChild(th);
-		}
-	}
-	function generateTable(table, numCells){
-		for (let x = 0; x < Math.sqrt(numCells); x++){
-			let row = table.insertRow();
-			for(let y = 0; y < Math.sqrt(numCells); y++){
-				let cell = row.insertCell();
-				let text = document.createTextNode(y+x*11);
-				cell.appendChild(text);
+			function addNote(gameNote){
+				let table = document.getElementById("notebook");
+				let row = table.insertRow(2);
+				let th = document.createElement("th");
+				let text = document.createTextNode(document.getElementById('gameNote').value);
+				th.appendChild(text);
+				row.appendChild(th);
+				if(table.rows.length > 11){
+					table.deleteRow(11);
+				}
 			}
-		}
-	}
-	let table = document.getElementById("gamemaptable");
-	let numCells = 121;
-	generateTable(table, numCells);
-	generateTableHead(table,numCells);
 
-
+			function generateTableHead(table, numCells){
+				let thead = table.createTHead();
+				let row = thead.insertRow();
+				for(let x = 0; x < Math.sqrt(numCells); x++){
+					let th = document.createElement("th");
+					let text = document.createTextNode("top");
+					th.appendChild(text);
+					row.appendChild(th);
+				}
+			}
+			function generateTable(table, numCells){
+				for (let x = 0; x < Math.sqrt(numCells); x++){
+					let row = table.insertRow();
+					for(let y = 0; y < Math.sqrt(numCells); y++){
+						let cell = row.insertCell();
+						let text = document.createTextNode(y+x*11);
+						cell.appendChild(text);
+					}
+				}
+			}
+			let table = document.getElementById("output-table");
+			let numCells = 121;
+			generateTable(table, numCells);
+			generateTableHead(table,numCells);
 
       // On click functions
       // Template literals: `string 1 ${variable} string 2`
       function update_data() {
         // Get input field data from fields used across all onclick functions
-        player_name = document.getElementById('register-response').value
+        player_name = document.getElementById('register-response').innerHTML
         ip_address = document.getElementById('server-ip').value
         port = document.getElementById('server-port').value
       }
+
+			let console_output = "";
+			function append_console(console_node, line){
+				console_output += `${line}\n`;
+				console_node.innerHTML = console_output;
+			}
+
   		function register() {
         update_data()
   			if(!player_name) {
@@ -164,18 +172,11 @@
   					url: `http://${ip_address}:${port}/register`,
   					type: 'GET',
               success: function(data) {
-  						player_name = data.player_name;
-  						let register_output = 'Playings as: ' + player_name;
-  						document.getElementById('register-response').innerHTML = register_output;
-              document.getElementById('register-response').value = player_name;
-			let table = document.getElementById("playerInfo");
-			table.deleteRow(1);
-			let row = table.insertRow(1);
-			let th = document.createElement("th");
-			let text = document.createTextNode(player_name);
-			th.appendChild(text);
-			row.appendChild(th);
-            }
+	  						player_name = data.player_name;
+	  						document.getElementById('register-response').innerHTML = player_name;
+	              document.getElementById('playing-as').innerHTML = player_name;
+								append_console(document.getElementById('console-box'), player_name);
+            	}
   				});
   			}
   		}
@@ -186,10 +187,12 @@
   				type: 'POST',
   				success: function(data) {
     				let available_characters = data.info;
-					let numPLayers = available_characters.length
+						let numPLayers = available_characters.length
     				let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-    				//document.getElementById('start-response').innerHTML = "There are players in the game: " + numPLayers;
-					document.getElementById('start-response').innerHTML = "There are players in the game: " + available_characters;
+						let output_string = "There are players in the game: " + available_characters;
+						append_console(document.getElementById('console-box'), output_string);
+						document.getElementById('start-response').innerHTML = output_string;
+
           }
   			});
   		}
@@ -204,9 +207,11 @@
             let num_players = data.numPlayers;
             let card_list = data.cardList
 
-            // let start_output = "You are playing the skeletal version of Clueless. Available players are: " + available_characters
-            document.getElementById('init-state-response').innerHTML = `Players in the game: ${num_players}<br /> Adjacent position 1: ${adj_pos_1}<br /> Adjacent position 2: ${adj_pos_2}<br /> Card List: ${card_list}`;
-          }
+						let output_string = `Players in the game: ${num_players}<br /> Adjacent position 1: ${adj_pos_1}<br /> Adjacent position 2: ${adj_pos_2}<br /> Card List: ${card_list}`;
+						append_console(document.getElementById('console-box'), output_string);
+            document.getElementById('init-state-response').innerHTML = output_string;
+						document.getElementById('init-state').innerHTML = output_string;
+					}
         });
       }
       function turn() {
@@ -215,7 +220,10 @@
           url: `http://${ip_address}:${port}/turn/${player_name}`,
           type: 'GET',
           success: function(data) {
-            document.getElementById('turn-response').innerHTML = `Currently ${data.playerTurn}'s turn`;
+						let output_string = `Currently ${data.playerTurn}'s turn`;
+						append_console(document.getElementById('console-box'), output_string);
+            document.getElementById('turn-response').innerHTML = output_string;
+						document.getElementById('current-player-turn').innerHTML = output_string;
           }
         });
       }
@@ -226,7 +234,10 @@
           type: 'GET',
           success: function(data) {
             let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
-            document.getElementById('options-response').innerHTML = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}`;
+						let output_string = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}`;
+						append_console(document.getElementById('console-box'), output_string);
+						document.getElementById('options-response').innerHTML = output_string;
+						document.getElementById('legal-moves').innerHTML = output_string;
           }
         });
       }
@@ -236,10 +247,16 @@
           url: `http://${ip_address}:${port}/cards/${player_name}`,
           type: 'GET',
           success: function(data) {
-            document.getElementById('cards-response').innerHTML = `Cards List: ${data.cardsList}`;
-          }
+						let output_string = `Characters: ${data.characters.join(", ")} | Rooms: ${data.rooms.join(", ")} | Weapons: ${data.weapons.join(", ")}`;
+						append_console(document.getElementById('console-box'), output_string);
+            document.getElementById('character-cards').innerHTML = data.characters.join("<br />");
+						document.getElementById('room-cards').innerHTML = data.rooms.join("<br />");
+						document.getElementById('weapon-cards').innerHTML = data.weapons.join("<br />");
+					}
         });
       }
+
+			occupation_class_name = "board-occupation";
 
       function positions() {
         update_data()
@@ -248,7 +265,13 @@
           type: 'GET',
           success: function(data) {
             // operate with the unstringified data variable when working with map display
-            document.getElementById('positions-response').innerHTML = JSON.stringify(data);
+						let output_string = JSON.stringify(data);
+						append_console(document.getElementById('console-box'), output_string);
+            document.getElementById('positions-response').innerHTML = output_string;
+						clear_gui_board(occupation_class_name);
+						for (const [name, value] of Object.entries(data)) {
+							document.getElementById(value.id_name).innerHTML = name;
+						}
           }
         });
       }
@@ -309,18 +332,18 @@
           },
           success: function(data) {
             var move_output = data.moveResult;
-            document.getElementById('move-response').innerHTML = player_name + move_output;
-			//display location on map
+						let output_string = player_name + move_output;
+						append_console(document.getElementById('console-box'), output_string);
+            document.getElementById('move-response').innerHTML = output_string;
 
           }
         });
       }
 
       // Table row initialization functions and data
-
       // JSON data we will use to dynamically generate our input fields in HTML.
       // TODO: To improve our clarity, we could make a 2 way hash map and use that.
-      field_json = [
+      const field_json = [
         {
           name:'register', //base string for generating html id to later get with document.getElementById
           description:'Register as player', //field label/description
@@ -365,9 +388,8 @@
             <td>
               <button class="btn" id="${field.name}-button">${field.description}</button>
             </td>
-            <td></td>
             <td>
-              <p><b id="${field.name}-response"></b></p>
+              <p><b class="server-response" id="${field.name}-response"></b></p>
             </td>
           </tr>`
         }).reduce(function (accum, field_html) {
@@ -375,17 +397,15 @@
         });
 
         // Add HTML tags and fields that we can't dynamically generate before and after the HTML tags generated above in html_fields
-        let html_fields_inner = `<tr>
+        let html_fields_inner = `
+								<tr>
                   <td style="width: 1px;"></td>
                   <td><b>Client Request</b></td>
-                  <td><b>Client Input</b></td>
-                  <td><b>Server Output</b></td>
+                  <td class="server-response"><b>Server Output</b></td>
                 </tr> ${html_fields} <tr>
           				<td style="width: 1px;"></td>
           				<td>
                     <button class="btn" id="move-button">Move</button>
-                  </td>
-                  <td>
                     <label>Move type</label>
                     <select id="moveType" onchange="enable_inputs(this)">
                       <option value="moveToRoom">Move to room</option>
@@ -397,44 +417,42 @@
                     </select>
                     <label>Character</label>
                     <select name="characters" id="character">
-						<option value="Mr-Green">Rev. Green</option>
-						<option value="Colonel-Mustard">Colonel Mustard</option>
-						<option value="Mrs-Peacock">Mrs. Peacock</option>
-						<option value="Professor-Plum">Professor Plum</option>
-						<option value="Miss-Scarlet">Miss Scarlett</option>
-						<option value="Mrs-White">Mrs. White</option>
-					</select><br />
+											<option value="Mr-Green">Rev. Green</option>
+											<option value="Colonel-Mustard">Colonel Mustard</option>
+											<option value="Mrs-Peacock">Mrs. Peacock</option>
+											<option value="Professor-Plum">Professor Plum</option>
+											<option value="Miss-Scarlet">Miss Scarlett</option>
+											<option value="Mrs-White">Mrs. White</option>
+										</select><br />
                     <label>Weapon</label>
-					<select name="weapons" id="weapon">
-						<option value="Candlestick">Candlestick</option>
-						<option value="Dagger">Dagger</option>
-						<option value="Lead Pipe">Lead Pipe</option>
-						<option value="Revolver">Revolver</option>
-						<option value="Rope">Rope</option>
-						<option value="Wrench">Wrench</option>
-					</select><br />
+										<select name="weapons" id="weapon">
+											<option value="Candlestick">Candlestick</option>
+											<option value="Dagger">Dagger</option>
+											<option value="Lead Pipe">Lead Pipe</option>
+											<option value="Revolver">Revolver</option>
+											<option value="Rope">Rope</option>
+											<option value="Wrench">Wrench</option>
+										</select><br />
                     <label>Location</label>
-					<select name="locations" id="location">
-						<option value="Ballroom">Ballroom</option>
-						<option value="Billard Room">Billard Room</option>
-						<option value="Dining Room">Dining Room</option>
-						<option value="Hall">Hall</option>
-						<option value="Kitchen">Kitchen</option>
-						<option value="Library">Library</option>
-						<option value="Lounge">Lounge</option>
-						<option value="Study">Study</option>
-					</select><br />
+										<select name="locations" id="location">
+											<option value="Ballroom">Ballroom</option>
+											<option value="Billard Room">Billard Room</option>
+											<option value="Dining Room">Dining Room</option>
+											<option value="Hall">Hall</option>
+											<option value="Kitchen">Kitchen</option>
+											<option value="Library">Library</option>
+											<option value="Lounge">Lounge</option>
+											<option value="Study">Study</option>
+										</select><br />
                     <label>Adjacency Index</label>
                     <input type="text" id="adjIndex" value="" /><br />
                   </td>
-                  <td></td>
                   <td>
-                    <p><b id="move-response"></b></p>
+                    <p><b class="server-response" id="move-response"></b></p>
                   </td>
                 </tr>`;
           return html_fields_inner;
       }
-
 
       function bind_fields(field_json){
         // It's bad practice to specify onclick in HTML, so we use the JQuery method instead.
@@ -448,8 +466,62 @@
         })
       }
 
-      // Move selection input logic and data
+			// Table row initialization functions and data
+			// JSON data we will use to dynamically generate our game board fields in HTML.
+			const board_array = [
+				["study", "hallway-connecting-study-to-hall", "hall", "hallway-connecting-hall-to-lounge", "lounge"],
+				["hallway-connecting-library-to-study", false, "hallway-connecting-hall-to-billiard-room", false, "hallway-connecting-lounge-to-dining-room"],
+				["library", "hallway-connecting-library-to-billiard-room", "billard-room", "hallway-connecting-dining-room-to-billiard-room", "dining-room"],
+				["hallway-connecting-conservatory-to-library", false, "hallway-connecting-ballroom-to-billiard-room", false, "hallway-connecting-dining-room-to-kitchen"],
+				["conservatory", "hallway-connecting-ballroom-to-conservatory", "ballroom", "hallway-connecting-kitchen-to-ballroom", "kitchen"]
+			]
+			function parse_to_css(s){//makes string usable as css id name
+				return `${s}`.replace(/\s+/g, '-').toLowerCase();
+			}
 
+			function create_board_gui(tbl, board_array, occupation_class_name){
+				var tblBody = document.createElement("tbody");
+				for (var row = 0; row < board_array.length; row++) {
+					var tr = document.createElement("tr");
+					tr.setAttribute("height", 150);
+					for (var col = 0; col < board_array[0].length; col++) {
+						var cell = document.createElement("td");
+						if (typeof board_array[row][col] === "string") {
+
+							var cell_room_div = document.createElement("div");
+							cell.appendChild(cell_room_div);
+							var cell_room_bold = document.createElement("b");
+							cell_room_div.appendChild(cell_room_bold);
+							var cell_room_text = document.createTextNode(`${board_array[row][col]}`);
+							cell_room_bold.appendChild(cell_room_text);
+
+							var cell_occupation_div = document.createElement("div");
+							cell_occupation_div.setAttribute("id", board_array[row][col]);
+							cell_occupation_div.setAttribute("class", "board-occupation");
+						}
+						else if (typeof board_array[row][col] === "boolean" && !board_array[row][col]) {
+
+						}
+						else {
+							throw "Board JSON bad type";
+						}
+						cell.appendChild(cell_occupation_div)
+						tr.appendChild(cell);
+
+					}
+					tblBody.appendChild(tr);
+				}
+				tbl.appendChild(tblBody);
+			}
+
+			function clear_gui_board(occupation_class_name){
+				matches = document.getElementsByClassName(occupation_class_name);
+				[...matches].forEach(function(node){
+					node.innerHTML = " "
+				})
+			}
+
+      // Move selection input logic and data
       function enable_inputs(obj){
         // Our onchange function for the move type dropdown
         // disable and clear unecessary input fields using our move_type_enable_json json data
@@ -464,8 +536,9 @@
       console.log(field_json)
       document.getElementById("output-table").innerHTML = generate_fields(field_json); // generate html code and puts it inside our table
       bind_fields(field_json) // makes onclick work for fields
+			create_board_gui(document.getElementById("board"), board_array) //create game board gui
 
-      let player_name = document.getElementById('register-response').value;
+      let player_name = document.getElementById('register-response').innerHTML;
       let ip_address = document.getElementById('server-ip').value;
       let port = document.getElementById('server-port').value;
 

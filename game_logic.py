@@ -16,7 +16,7 @@ class Card:
         self.type = card_type
         self.number = number
         self.name = name
-    
+
 class Player:
     def __init__(self,name,location):
         self.name = name
@@ -24,7 +24,7 @@ class Player:
         self.location = location
         self.hand = []
         self.suggested = False
-        
+
     def getLegalMoves(self):
         if self.accusation_made is True:
             #player can only move and respond to accusations
@@ -43,20 +43,22 @@ class Player:
             #they can do whatever
             print("You can move into a room or make a accusation.")
             return ["moveToRoom", "accuse"]
-            
+
 class Room:
     def __init__(self, name, corner_room):
         self.name = name
+        self.id_name = self.name.lower().replace(' ', '-')
         self.corner_room = corner_room
         #self.adj_room = []
         self.adj_locs = []
         self.exits = True
         self.chars_in_room = []
         self.type = 1
-        
+
 class Hallway:
     def __init__(self, adj_locs):
         self.name = "Hallway connecting " + adj_locs[0].name + " to " + adj_locs[1].name
+        self.id_name = self.name.lower().replace(' ', '-')
         self.adj_locs = adj_locs
         self.type = 0
 
@@ -65,7 +67,7 @@ class CaseFile:
         self.suspect = suspect
         self.weapon = weapon
         self.room = room
-        
+
 class Deck:
     def __init__(self, Players, cards):
         self.Players = Players
@@ -100,7 +102,7 @@ class Deck:
             i += 1
             if i > (self.numPlayers -1):
                 i = 0
-        
+
         return case_file
 class Board:
     def __init__(self, rooms, hallways, caseFile):
@@ -111,21 +113,21 @@ class Board:
 def cardInitialization():
     #initialize character cards
     card = []
-    
+
     card.append(Card(1, 1, "Rev. Green"))
     card.append(Card(1, 2, "Colonel Mustard"))
     card.append(Card(1, 3, "Mrs. Peacock"))
     card.append(Card(1, 4, "Professor Plum"))
     card.append(Card(1, 5, "Miss Scarlett"))
     card.append(Card(1, 6, "Mrs. White"))
-    
+
     #card[0] = Card(1, 1, "Rev. Green")
     #card[1] = Card(1, 2, "Colonel Mustard")
     #card[2] = Card(1, 3, "Mrs. Peacock")
     #card[3] = Card(1, 4, "Professor Plum")
     #card[4] = Card(1, 5, "Miss Scarlett")
     #card[5] = Card(1, 6, "Mrs. White")
-    
+
     #initialize weapon cards
     card.append(Card(2, 7, "Candlestick"))
     card.append(Card(2, 8, "Dagger"))
@@ -133,15 +135,15 @@ def cardInitialization():
     card.append(Card(2, 10, "Revolver"))
     card.append(Card(2, 11, "Rope"))
     card.append(Card(2, 12, "Wrench"))
-    
-    
+
+
 #    card[6] = Card(2, 7, "Candlestick")
 #    card[7] = Card(2, 8, "Dagger")
 #    card[8] = Card(2, 9, "Lead Pipe")
 #    card[9] = Card(2, 10, "Revolver")
 #    card[10] = Card(2, 11, "Rope")
 #    card[11] = Card(2, 12, "Wrench")
-    
+
     #initialize room cards
     card.append(Card(3, 13, "Ballroom"))
     card.append(Card(3, 14, "Billard Room"))
@@ -152,7 +154,7 @@ def cardInitialization():
     card.append(Card(3, 19, "Library"))
     card.append(Card(3, 20, "Lounge"))
     card.append(Card(3, 21, "Study"))
-    
+
 #    card[12] = Card(3, 13, "Ballroom")
 #    card[13] = Card(3, 14, "Billard Room")
 #    card[14] = Card(3, 15, "Conservatory")
@@ -163,7 +165,7 @@ def cardInitialization():
 #    card[19] = Card(3, 20, "Lounge")
 #    card[20] = Card(3, 21, "Study")
     return card
-    
+
 def roomInitialization():
     room = []
     room.append(Room("Study",1))
@@ -175,12 +177,12 @@ def roomInitialization():
     room.append(Room("Conservatory",1))
     room.append(Room("Library",0))
     room.append(Room("Billard Room",0))
-    
+
     room[0].corner_room = room[4]
     room[2].corner_room = room[6]
     room[4].corner_room = room[0]
     room[6].corner_room = room[2]
-    
+
 #    room[0]= Room("Study",1)
 #    room[1] = Room("Hall",0)
 #    room[2] = Room("Lounge",1)
@@ -189,9 +191,9 @@ def roomInitialization():
 #    room[5] = Room("Ballroom",0)
 #    room[6] = Room("Conservatory",1)
 #    room[7] = Room("Library",0)
-#    room[8] = Room("Billard Room",0)  
+#    room[8] = Room("Billard Room",0)
     return room
-    
+
 def hallwayInitialization(room):
     hallway = []
     hallway.append(Hallway([room[0], room[1]])) #study to hall 0
@@ -206,7 +208,7 @@ def hallwayInitialization(room):
     hallway.append(Hallway([room[3], room[8]])) #dining room to billiard room
     hallway.append(Hallway([room[5], room[8]])) #ballroom to billiard room 10
     hallway.append(Hallway([room[7], room[8]])) #library to billiard room
-    
+
     room[0].adj_locs = [hallway[0], hallway[7]]
     room[1].adj_locs = [hallway[0], hallway[1], hallway[8]]
     room[2].adj_locs = [hallway[1], hallway[2]]
@@ -216,8 +218,8 @@ def hallwayInitialization(room):
     room[6].adj_locs = [hallway[5], hallway[6]]
     room[7].adj_locs = [hallway[6], hallway[7], hallway[11]]
     room[8].adj_locs = [hallway[8], hallway[9], hallway[10], hallway[11]]
-    
-    
+
+
 #    hallway[0] = Hallway([room[0], room[1]]) #study to hall
 #    hallway[1] = Hallway([room[1], room[2]]) #hall to lounge
 #    hallway[2] = Hallway([room[2], room[3]]) #lounge to dining room
@@ -231,15 +233,15 @@ def hallwayInitialization(room):
 #    hallway[10] = Hallway([room[5], room[9]]) #ballroom to billiard room
 #    hallway[11] = Hallway([room[7], room[9]]) #library to billiard room
     return hallway
-    
+
 def playerInitialization(hallway, playerList):
     player = {}
     i = 0
     for character in playerList:
         player.update({character : Player(character, hallway[i])})
         i += 1
-    
-    
+
+
 #    player[0] = Player("Rev. Green", hallway[5])
 #    player[1] = Player("Colonel Mustard", hallway[2])
 #    player[2] = Player("Mrs. Peacock", hallway[6])
@@ -251,44 +253,36 @@ def playerInitialization(hallway, playerList):
 def performSuggestion(suspectName, weaponName, locationName, playerList):
     #TODO
     return suggestionResponse(suspectName, locationName, weaponName, playerList)
-    
+
 def suggestionResponse(suspectName, locationName, weaponName, playerList):
     for player in playerList.values():
         for card in player.hand:
             if card.name == suspectName or card.name == locationName or card.name == weaponName:
                 return player.name + " has disproved the suggestion, by showing the card " + card.name;
     return "No one could disprove the suggestion!"
-    
-    
+
+
 def performAccusation(board, player, suspectName, weaponName, roomName):
-        
+
     print(player.name + "has selected the following: ")
     print("Suspect: " + suspectName)
     print("Room: " + roomName)
     print("Weapon: " + weaponName)
-    
+
     if board.caseFile.suspect.name == suspectName and board.caseFile.room.name == roomName and board.caseFile.weapon.name == weaponName:
-        
+
         print("")
-        print("*****************************************")   
+        print("*****************************************")
         print(player.name + " has won the game!")
-        print("*****************************************") 
+        print("*****************************************")
         print("")
         print("The suspect was: " + board.caseFile.suspect.name)
         print("The room was: " + board.caseFile.room.name)
         print("The weapon was: " + board.caseFile.weapon.name, flush=True)
-        global game_over_flag 
+        global game_over_flag
         game_over_flag = 1
         return True
     else:
         print(player.name + " was incorrect.", flush=True)
         player.accusation_made = True
         return False
-
-
-
-        
-        
-        
-        
-        
