@@ -413,6 +413,7 @@ class initResource(object):
     def on_post(self, req, resp, player_id):
         resp.set_header('Powered-By', 'Falcon')
         #resp.body = '{}'
+
         if len(self.gs.playerList) < 2:
             raise falcon.HTTPInternalServerError(
             "Insufficent Players Registered",
@@ -423,10 +424,15 @@ class initResource(object):
             "Invalid Player Name",
             "That player name is not currently playing"
             )
-        character_list = ''
-        self.gs.init_gamestate()
-        resp.body = json.dumps({ 'info' : " ".join(self.gs.playerListActive) });
-        resp.status = falcon.HTTP_201
+        if not self.gs.gameStarted:
+            character_list = ''
+            self.gs.init_gamestate()
+            resp.body = json.dumps({ 'info' : " ".join(self.gs.playerListActive) });
+            resp.status = falcon.HTTP_201
+        else:
+            resp.body = json.dumps({ 'info' : "Game has started already."});
+            resp.status = falcon.HTTP_200
+
 
 class CORSComponent(object):
     def process_response(self, req, resp, resource, req_succeeded):
