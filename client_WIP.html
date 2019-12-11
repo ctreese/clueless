@@ -372,7 +372,7 @@
 						let output_string = player_name + move_output;
 						append_console(document.getElementById('console-box'), output_string);
             document.getElementById('move-response').innerHTML = output_string;
-						document.getElementsById('move-result-output').innerHTML = output_string;
+						document.getElementById('move-result-output').innerHTML = output_string;
 		},
 		  error: function(xhr, status, error) {
 			  var err = JSON.parse(xhr.responseText);
