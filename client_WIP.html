@@ -262,7 +262,7 @@
           type: 'GET',
           success: function(data) {
             let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}<br />`).reduce((accum, serialized) => accum = accum + serialized);
-						let output_string = `Current move options: ${data.move_options.join(", ")}<br />Adjacent: ${adj_text}`;
+						let output_string = `<b>Current move options: </b><br />${data.move_options.join(", ")}<br /><b>Adjacent: </b><br />${adj_text}`;
 						append_console(document.getElementById('console-box'), output_string);
 						document.getElementById('options-response').innerHTML = output_string;
 						document.getElementById('legal-moves').innerHTML = output_string;
