@@ -34,6 +34,10 @@
 		height:100px;
 	}
 
+	.board-room{
+		border-bottom: 1px
+	}
+
 </style>
 
 
@@ -65,6 +69,7 @@
 					<th> Location Cards </th>
 					<th> Weapon Cards </th>
 					<th> Initial State </th>
+					<th> Game Started </th>
 				</tr>
 				<tr>
 					<td id="playing-as"> </td>
@@ -72,6 +77,7 @@
 					<td id="character-cards"> </td>
 					<td id="weapon-cards"> </td>
 					<td id="init-state"> </td>
+					<td id="game-has-started">No</td>
 				</tr>
 		  </table>
 			<table id="turn-info" class="table table-striped">
@@ -112,6 +118,8 @@
 
 
     <script type="text/javascript">
+
+			let game_has_started = false;
 
 			function addNote(gameNote){
 				let table = document.getElementById("notebook");
@@ -192,7 +200,8 @@
 						let output_string = "There are players in the game: " + available_characters;
 						append_console(document.getElementById('console-box'), output_string);
 						document.getElementById('start-response').innerHTML = output_string;
-
+						document.getElementById('game-has-started').innerHTML = "Yes";
+						game_has_started = true;
           }
   			});
   		}
@@ -489,10 +498,11 @@
 						if (typeof board_array[row][col] === "string") {
 
 							var cell_room_div = document.createElement("div");
+							cell_room_div.setAttribute("class", "board-room");
 							cell.appendChild(cell_room_div);
 							var cell_room_bold = document.createElement("b");
 							cell_room_div.appendChild(cell_room_bold);
-							var cell_room_text = document.createTextNode(`${board_array[row][col]}`);
+							var cell_room_text = document.createTextNode(`${board_array[row][col].split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}`);
 							cell_room_bold.appendChild(cell_room_text);
 
 							var cell_occupation_div = document.createElement("div");
@@ -521,6 +531,18 @@
 				})
 			}
 
+			function update_turn_info(){
+				if(game_has_started){
+					turn();
+					options();
+					positions();
+				}
+			}
+
+			function auto_update_turn_info(){
+					setInterval(update_turn_info, 5000);
+			}
+
       // Move selection input logic and data
       function enable_inputs(obj){
         // Our onchange function for the move type dropdown
@@ -537,6 +559,7 @@
       document.getElementById("output-table").innerHTML = generate_fields(field_json); // generate html code and puts it inside our table
       bind_fields(field_json) // makes onclick work for fields
 			create_board_gui(document.getElementById("board"), board_array) //create game board gui
+			auto_update_turn_info() // COMMENT THIS OUT IF YOU WANT TO DISABLE AUTO TURN STATE UPDATING
 
       let player_name = document.getElementById('register-response').innerHTML;
       let ip_address = document.getElementById('server-ip').value;
