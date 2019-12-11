@@ -319,11 +319,24 @@ class MoveResource(object):
         info = ""
         if(move == "moveToHallway"):
             #move to hallway logic
-            oldLoc = self.gs.players[player_id].location.name
-            self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
-            nextRoom = self.gs.players[player_id].location.adj_locs[0].name
-            if(nextRoom == oldLoc):
-                nextRoom = self.gs.players[player_id].location.adj_locs[1].name
+            #collision detection
+            newLoc = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
+            conflict = False
+            for player in self.gs.players.values():
+                if player.location == newLoc and not player.accusation_made:
+                    conflict = True
+            if(conflict):
+                raise falcon.HTTPBadRequest(
+                "Blocked Hallway",
+                "You cannot move into an occupied hallway."
+                )
+            else:
+                oldLoc = self.gs.players[player_id].location.name
+                self.gs.players[player_id].location = self.gs.players[player_id].location.adj_locs[int(req.media.get('adjIndex'))]
+                nextRoom = self.gs.players[player_id].location.adj_locs[0].name
+                if(nextRoom == oldLoc):
+                    nextRoom = self.gs.players[player_id].location.adj_locs[1].name
+                info = " moved from the " + oldLoc + " to the hallway leading to " + nextRoom
             info = " moved from the " + oldLoc + " to the hallway leading to " + nextRoom
         elif(move == "moveToRoom"):
             #move to room
