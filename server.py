@@ -12,7 +12,7 @@ class Gamestate(object):
 
     playerList = []
     playerListActive = []
-    avaliableCharacters = ["Miss-Scarlet", "Professor-Plum", "Mrs-Peacock", "Mr-Green", "Mrs-White", "Colonel-Mustard"]
+    avaliableCharacters = ["Miss Scarlet", "Professor Plum", "Mrs. Peacock", "Rev. Green", "Mrs. White", "Colonel Mustard"]
     playerTurn = ""
     gameStarted = False
 
