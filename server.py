@@ -77,7 +77,7 @@ class Gamestate(object):
                 print("The suspect was: " + self.board.caseFile.suspect.name)
                 print("The room was: " + self.board.caseFile.room.name)
                 print("The weapon was: " + self.board.caseFile.weapon.name, flush=True)
-                self.gameStarted = False                    
+                self.gameStarted = False
 
     def makeSuggestion(self, character, suspect, weapon, location):
         addInfo = ""

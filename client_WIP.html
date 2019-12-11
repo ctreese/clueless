@@ -84,10 +84,12 @@
 				<tr>
 					<th> Current Player's Turn</th>
 					<th> Current Legal Moves</th>
+					<th> Move Result </th>
 				</tr>
 				<tr>
 					<td id="current-player-turn"> </td>
 					<td id="legal-moves"> </td>
+					<td id="move-result-output"> </td>
 				</tr>
 			</table>
 			<div>
@@ -211,7 +213,7 @@
 			  var err = JSON.parse(xhr.responseText);
 			  alert(err.description);
 			}
-		  
+
   			});
   		}
       function get_init_state() {
@@ -259,8 +261,8 @@
           url: `http://${ip_address}:${port}/options/${player_name}`,
           type: 'GET',
           success: function(data) {
-            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}. `).reduce((accum, serialized) => accum = accum + serialized);
-						let output_string = `Current move options: ${data.move_options}<br />Adjacent: ${adj_text}`;
+            let adj_text = data.adj.map(destination_obj => `ID:${destination_obj.id} Destination: ${destination_obj.destination}<br />`).reduce((accum, serialized) => accum = accum + serialized);
+						let output_string = `Current move options: ${data.move_options.join(", ")}<br />Adjacent: ${adj_text}`;
 						append_console(document.getElementById('console-box'), output_string);
 						document.getElementById('options-response').innerHTML = output_string;
 						document.getElementById('legal-moves').innerHTML = output_string;
@@ -303,6 +305,7 @@
 							document.getElementById(value.id_name).innerHTML += name + "<br>";
 						}
           	},
+
 		  error: function(xhr, status, error) {
 			  var err = JSON.parse(xhr.responseText);
 			  alert(err.description);
@@ -369,7 +372,7 @@
 						let output_string = player_name + move_output;
 						append_console(document.getElementById('console-box'), output_string);
             document.getElementById('move-response').innerHTML = output_string;
-
+						document.getElementsById('move-result-output').innerHTML = output_string;
 		},
 		  error: function(xhr, status, error) {
 			  var err = JSON.parse(xhr.responseText);
@@ -443,7 +446,8 @@
                 </tr> ${html_fields} <tr>
           				<td style="width: 1px;"></td>
           				<td>
-                    <button class="btn" id="move-button">Move</button>
+                    <button class="btn" id="move-button">Move</button><br />
+										<label> </label>
                     <label>Move type</label>
                     <select id="moveType" onchange="enable_inputs(this)">
                       <option value="moveToRoom">Move to room</option>
