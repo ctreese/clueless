@@ -393,9 +393,7 @@ class initResource(object):
         else:
             startingPos1 = self.gs.players[player_id].location.adj_locs[0].name
             startingPos2 = self.gs.players[player_id].location.adj_locs[1].name
-            print("The suspect is: " + self.gs.board.caseFile.suspect.name)
-            print("The room is: " + self.gs.board.caseFile.room.name)
-            print("The weapon is: " + self.gs.board.caseFile.weapon.name, flush=True)
+
             numPlayers = self.gs.deck.numPlayers
             cardsList = []
             for card in self.gs.players[player_id].hand:
@@ -429,6 +427,9 @@ class initResource(object):
             self.gs.init_gamestate()
             resp.body = json.dumps({ 'info' : " ".join(self.gs.playerListActive) });
             resp.status = falcon.HTTP_201
+            print("The suspect is: " + self.gs.board.caseFile.suspect.name)
+            print("The room is: " + self.gs.board.caseFile.room.name)
+            print("The weapon is: " + self.gs.board.caseFile.weapon.name, flush=True)
         else:
             resp.body = json.dumps({ 'info' : "Game has started already."});
             resp.status = falcon.HTTP_200
